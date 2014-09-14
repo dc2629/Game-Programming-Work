@@ -1,6 +1,11 @@
 #include <SDL.h>
 #include <SDL_opengl.h>
 #include <SDL_image.h>
+#include<iostream>
+#include<string>
+#include<Windows.h>
+#include<stdio.h>
+
 
 SDL_Window* displayWindow;
 
@@ -43,7 +48,7 @@ void DrawSprite(GLint texture, float x, float y, float rotation) {
 int main(int argc, char *argv[])
 {
 	//Main Setup
-	SDL_Init(SDL_INIT_VIDEO);//Initializes the video?
+	SDL_Init(SDL_INIT_VIDEO);//Initializes SDL
 	displayWindow = SDL_CreateWindow("My Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_OPENGL);//Creates the window with OpenGL and the dimensions of the window.
 	SDL_GLContext context = SDL_GL_CreateContext(displayWindow);
 	SDL_GL_MakeCurrent(displayWindow, context);//Make the window appear?
@@ -56,19 +61,21 @@ int main(int argc, char *argv[])
 	glMatrixMode(GL_PROJECTION);//Usually ran once and thats it.
 	glOrtho(-1.33, 1.33, -1, 1, -1, 1);//The ratio of resolutions
 
+	char* pngLocation = "meteorBig.png";
+	SDL_Surface *surface = IMG_Load(pngLocation);
+	GLint bMeteor = LoadTexture(pngLocation);
 	
-	//glMatrixMode(GL_MODELVIEW);// May be ran multiple times inside code
 
 	while (!done) {
 		while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {//If the Window is closed or the user quits the program, end the loop.
 				done = true;
 			}
-
 		}
-		glClearColor(0.8f, 0.2f, 0.4f, 1.0f);//Determines default coloring
-		glClear(GL_COLOR_BUFFER_BIT);//Makes background default color
+				glClearColor(0.8f, 0.2f, 0.4f, 1.0f);//Determines default coloring
+				glClear(GL_COLOR_BUFFER_BIT);//Makes background default color
 
+		
 
 
 
