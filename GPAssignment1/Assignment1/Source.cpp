@@ -4,57 +4,83 @@
 
 SDL_Window* displayWindow;
 
+//Loading Textures from images, use PNG file storage type. Retuns unsigned GL int.
+GLuint LoadTexture(const char *image_path) {
+	SDL_Surface *surface = IMG_Load(image_path);
+	GLuint textureID;
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_2D, textureID);
+	glTexImage2D(GL_TEXTURE_2D, 0, 4, surface->w, surface->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, surface->pixels);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	SDL_FreeSurface(surface);
+	
+	return textureID;
+}
+
+
+//A simple sprite system:
+void DrawSprite(GLint texture, float x, float y, float rotation) {
+
+	glEnable(GL_TEXTURE_2D);//enable or disable server-side GL capabilities, in this case enables 2d textures.
+	glBindTexture(GL_TEXTURE_2D, texture);//binds texture to target. Binds an image to the texture map.
+	glMatrixMode(GL_MODELVIEW);//Modelview matrix determines location and angle of the sprites.
+	glLoadIdentity();//Resets all sprites.
+	glTranslatef(x, y, 0.0);//move sprites across the window.
+	glRotatef(rotation, 0.0, 0.0, 1.0);//rotations on the z-view.
+	GLfloat quad[] = { -0.5f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f, 0.5f, 0.5f };//Defines a quad to place the image. REMEMBER COUNTER CLOCKWISE LISTING OF VERTICES
+	glVertexPointer(2, GL_FLOAT, 0, quad);//Read 2, FLOAT VALUES, SKIP 0 values in case we put colors in the matrix, and quad is the pointer to the array.
+	glEnableClientState(GL_VERTEX_ARRAY);//allows for server to access the vertex arrays and for clients to draw the arrays.
+	GLfloat quadUVs[] = { 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0 };//Not really sure what it does.
+	glTexCoordPointer(2, GL_FLOAT, 0, quadUVs);//Defines an array of texture coordinates 
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnable(GL_BLEND);//Enable blending
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);//Alpha blending, basically removing the background of the quad.
+	glDrawArrays(GL_QUADS, 0, 4);//Drawing quads, starting from 0, and draw 4 vertices. 
+	glDisable(GL_TEXTURE_2D);//Disable the texture since OpenGl won't use the same texture when redrawing other quads.
+}
+
 int main(int argc, char *argv[])
 {
-	SDL_Init(SDL_INIT_VIDEO);
-	displayWindow = SDL_CreateWindow("My Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_OPENGL);
+	//Main Setup
+	SDL_Init(SDL_INIT_VIDEO);//Initializes the video?
+	displayWindow = SDL_CreateWindow("My Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_OPENGL);//Creates the window with OpenGL and the dimensions of the window.
 	SDL_GLContext context = SDL_GL_CreateContext(displayWindow);
-	SDL_GL_MakeCurrent(displayWindow, context);
+	SDL_GL_MakeCurrent(displayWindow, context);//Make the window appear?
 
-	bool done = false;
+	bool done = false;//Running/Updating Windows requires loops.
 
-	SDL_Event event;
+	SDL_Event event; //Logs the I/O of the user
 
 	glViewport(0, 0, 800, 600);//The start of using OpenGL with the arguments as the resolution.
 	glMatrixMode(GL_PROJECTION);//Usually ran once and thats it.
 	glOrtho(-1.33, 1.33, -1, 1, -1, 1);//The ratio of resolutions
 
+	
+	//glMatrixMode(GL_MODELVIEW);// May be ran multiple times inside code
+
 	while (!done) {
 		while (SDL_PollEvent(&event)) {
-			if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
+			if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {//If the Window is closed or the user quits the program, end the loop.
 				done = true;
 			}
 
 		}
-		glClearColor(0.8f, 0.2f, 0.4f, 1.0f);
+		glClearColor(0.8f, 0.2f, 0.4f, 1.0f);//Determines default coloring
+		glClear(GL_COLOR_BUFFER_BIT);//Makes background default color
 
-		glClear(GL_COLOR_BUFFER_BIT);
-		//glMatrixMode(GL_MODELVIEW);//Run multiple times inside code
-		glLoadIdentity();
-		glTranslatef(.5f, 0.0f, 0.0f);
-		//Drawing a triangle
-		GLfloat triangle[] = { 0, .5, -.5, -.5, .5, -.5 };//REMEMBER COUNTER CLOCKWISE LISTING OF VERTICES
-		glVertexPointer(2, GL_FLOAT, 0, triangle);//Read 2, FLOAT VALUES, SKIP 0 values in case we put colors in the triangle, and triangle is the pointer to the array.
-		glEnableClientState(GL_VERTEX_ARRAY);
 
-		//Giving the Triangle Color
-		GLfloat ctriangle[] = { 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f };
-		glColorPointer(3, GL_FLOAT, 0, ctriangle);
-		glEnableClientState(GL_COLOR_ARRAY);
 
-		//glDisableClientState(GL_COLOR_ARRAY);
 
-		//Drawing a quad
-		GLfloat quad[] = { -.5f, .5f, -.5f, -.5f, .5f, -.5f, .5f, .5f };
-		glVertexPointer(2, GL_FLOAT, 0, quad);
-		glEnableClientState(GL_VERTEX_ARRAY);
 
-		glDrawArrays(GL_QUADS, 0, 4);
-		glDrawArrays(GL_TRIANGLES, 0, 3);//Drawing triangles, starting from 0, and draw 3 vertices. 
-		SDL_GL_SwapWindow(displayWindow);
 
+
+
+
+		SDL_GL_SwapWindow(displayWindow);//Something about there being two windows, swap the one that is visible and the one that is being programmed.
 	}
 
 	SDL_Quit();
+
 	return 0;
 }
