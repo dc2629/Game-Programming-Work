@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Express 2013 for Windows Desktop
 VisualStudioVersion = 12.0.30723.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Textures Assignment 1", "Textures Assignment 1\Textures Assignment 1.vcxproj", "{31BF0E47-3FC9-4A2D-B657-26C92E181947}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Assignment1", "Assignment1\Assignment1.vcxproj", "{363B3AE8-BE11-46C6-9227-7877DE62B783}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|Win32 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{31BF0E47-3FC9-4A2D-B657-26C92E181947}.Debug|Win32.ActiveCfg = Debug|Win32
-		{31BF0E47-3FC9-4A2D-B657-26C92E181947}.Debug|Win32.Build.0 = Debug|Win32
-		{31BF0E47-3FC9-4A2D-B657-26C92E181947}.Release|Win32.ActiveCfg = Release|Win32
-		{31BF0E47-3FC9-4A2D-B657-26C92E181947}.Release|Win32.Build.0 = Release|Win32
+		{363B3AE8-BE11-46C6-9227-7877DE62B783}.Debug|Win32.ActiveCfg = Debug|Win32
+		{363B3AE8-BE11-46C6-9227-7877DE62B783}.Debug|Win32.Build.0 = Debug|Win32
+		{363B3AE8-BE11-46C6-9227-7877DE62B783}.Release|Win32.ActiveCfg = Release|Win32
+		{363B3AE8-BE11-46C6-9227-7877DE62B783}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
