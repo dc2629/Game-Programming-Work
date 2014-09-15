@@ -10,7 +10,7 @@
 SDL_Window* displayWindow;
 
 //Loading Textures from images, use PNG file storage type. Retuns unsigned GL int.
-GLuint LoadTexture(const char *image_path) {
+GLuint LoadTexture(const char* image_path) {
 	SDL_Surface *surface = IMG_Load(image_path);
 	GLuint textureID;
 	glGenTextures(1, &textureID);
@@ -61,10 +61,12 @@ int main(int argc, char *argv[])
 	glMatrixMode(GL_PROJECTION);//Usually ran once and thats it.
 	glOrtho(-1.33, 1.33, -1, 1, -1, 1);//The ratio of resolutions
 
-	char* pngLocation = "meteorBig.png";
+	char* pngLocation = "dnyan.jpg";
 	SDL_Surface *surface = IMG_Load(pngLocation);
-	GLint bMeteor = LoadTexture(pngLocation);
-	
+	//GLint bMeteor = LoadTexture(pngLocation);//Code that makes everything crash.
+	if (!surface){
+		std::cout << "Not Working Buddy" << std::endl;
+	}
 
 	while (!done) {
 		while (SDL_PollEvent(&event)) {
