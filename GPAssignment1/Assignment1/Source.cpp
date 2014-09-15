@@ -4,7 +4,7 @@
 #include<iostream>
 #include<string>
 #include<stdio.h>
-
+#include<math.h>
 
 SDL_Window* displayWindow;
 
@@ -37,7 +37,7 @@ void DrawSprite(GLint texture, float x, float y, float rotation) {
 	glEnableClientState(GL_VERTEX_ARRAY);//allows for server to access the vertex arrays and for clients to draw the arrays.
 	GLfloat quadUVs[] = { 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0 };//Not really sure what it does.
 	glTexCoordPointer(2, GL_FLOAT, 0, quadUVs);//Defines an array of texture coordinates 
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);	
 	glEnable(GL_BLEND);//Enable blending
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);//Alpha blending, basically removing the background of the quad.
 	glDrawArrays(GL_QUADS, 0, 4);//Drawing quads, starting from 0, and draw 4 vertices. 
@@ -63,6 +63,15 @@ int main(int argc, char *argv[])
 	char* pngLocation = "meteorBig.png";//File needs to be in cpp file location while dlls need to be in exe location.
 	GLint bMeteor = LoadTexture(pngLocation);
 
+	char* png2location = "nyan.png";
+	GLint nyan = LoadTexture(png2location);
+	
+	char* png3location = "nyan.png";
+	GLint Mouse = LoadTexture(png3location);
+	
+
+	float lastFrameTicks = 0.0f;
+	float nyanAngle = 0.0f;
 
 	while (!done) {
 		while (SDL_PollEvent(&event)) {
@@ -70,14 +79,19 @@ int main(int argc, char *argv[])
 				done = true;
 			}
 		}
-				glClearColor(0.8f, 0.2f, 0.4f, 1.0f);//Determines default coloring
+				glClearColor(55.0f/255.0f, 84.0f/255.0f, 229.0f/255.0f, 1.0f);//Determines default coloring
 				glClear(GL_COLOR_BUFFER_BIT);//Makes background default color
 
 				DrawSprite(bMeteor, 0, .5, 0);
+				float ticks = (float)SDL_GetTicks() / 1000.0f;
+				float elapsed = ticks - lastFrameTicks;
+				lastFrameTicks = ticks;
+				nyanAngle += elapsed;
+				DrawSprite(nyan, -.5, -.5, nyanAngle);
 
 
-
-
+				DrawSprite(Mouse,.5,-.5,270);
+				
 
 
 
