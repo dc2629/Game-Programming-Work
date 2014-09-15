@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
 		float ticks = (float)SDL_GetTicks() / 1000.0f;
 		float elapsed = ticks - lastFrameTicks;
 		lastFrameTicks = ticks;
-		nyanAngle += elapsed;
+		nyanAngle += elapsed*45.0f;
 		DrawSprite(nyan, -.5, -.5, nyanAngle);
 
 		//Coloring specific sprites
