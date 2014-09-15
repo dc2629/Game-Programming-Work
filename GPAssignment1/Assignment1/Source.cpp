@@ -41,7 +41,7 @@ void DrawSprite(GLint texture, float x, float y, float rotation,bool a) {
 	//For coloring the specific image
 	if (a){
 		glEnableClientState(GL_COLOR_ARRAY);
-		GLfloat cArray[] = { 1.0, 1.0, 1.0,1.0  ,0.0, 1.0, 0.0, 1.0,  0.0,0.0,1.0, 1.0  ,0.0,0.0,0.0, 1.0 };
+		GLfloat cArray[] = { 1.0, 0.0, 0.0,1.0  ,1.0, 0.0, 0.0, 1.0,  1.0,0.0,0.0, 1.0  ,1.0,0.0,0.0, 1.0 };
 		glColorPointer(4, GL_FLOAT, 0, cArray);
 	}
 	
