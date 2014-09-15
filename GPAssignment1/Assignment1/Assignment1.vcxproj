@@ -83,8 +83,8 @@
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\Release\dnyan.jpg" />
     <Image Include="..\Release\meteorBig.png" />
+    <Image Include="nyan.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

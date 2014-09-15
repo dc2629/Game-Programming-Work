@@ -23,7 +23,7 @@
     <Image Include="..\Release\meteorBig.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="..\Release\dnyan.jpg">
+    <Image Include="nyan.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
