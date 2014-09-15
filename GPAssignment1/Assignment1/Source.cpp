@@ -24,7 +24,7 @@ GLuint LoadTexture(const char* image_path) {
 
 
 //A simple sprite system:
-void DrawSprite(GLint texture, float x, float y, float rotation) {
+void DrawSprite(GLint texture, float x, float y, float rotation,bool a) {
 
 	glEnable(GL_TEXTURE_2D);//enable or disable server-side GL capabilities, in this case enables 2d textures.
 	glBindTexture(GL_TEXTURE_2D, texture);//binds texture to target. Binds an image to the texture map.
@@ -37,10 +37,21 @@ void DrawSprite(GLint texture, float x, float y, float rotation) {
 	glEnableClientState(GL_VERTEX_ARRAY);//allows for server to access the vertex arrays and for clients to draw the arrays.
 	GLfloat quadUVs[] = { 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0 };//Not really sure what it does.
 	glTexCoordPointer(2, GL_FLOAT, 0, quadUVs);//Defines an array of texture coordinates 
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);	
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	//For coloring the specific image
+	if (a){
+		glEnableClientState(GL_COLOR_ARRAY);
+		GLfloat cArray[] = { 1.0, 1.0, 1.0,1.0  ,0.0, 1.0, 0.0, 1.0,  0.0,0.0,1.0, 1.0  ,0.0,0.0,0.0, 1.0 };
+		glColorPointer(4, GL_FLOAT, 0, cArray);
+	}
+	
+	
 	glEnable(GL_BLEND);//Enable blending
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);//Alpha blending, basically removing the background of the quad.
 	glDrawArrays(GL_QUADS, 0, 4);//Drawing quads, starting from 0, and draw 4 vertices. 
+	if (a){
+		glDisableClientState(GL_COLOR_ARRAY);
+	}
 	glDisable(GL_TEXTURE_2D);//Disable the texture since OpenGl won't use the same texture when redrawing other quads.
 }
 
@@ -65,10 +76,9 @@ int main(int argc, char *argv[])
 
 	char* png2location = "nyan.png";
 	GLint nyan = LoadTexture(png2location);
-	
-	char* png3location = "nyan.png";
+
+	char* png3location = "pMouse.png";
 	GLint Mouse = LoadTexture(png3location);
-	
 
 	float lastFrameTicks = 0.0f;
 	float nyanAngle = 0.0f;
@@ -82,15 +92,15 @@ int main(int argc, char *argv[])
 				glClearColor(55.0f/255.0f, 84.0f/255.0f, 229.0f/255.0f, 1.0f);//Determines default coloring
 				glClear(GL_COLOR_BUFFER_BIT);//Makes background default color
 
-				DrawSprite(bMeteor, 0, .5, 0);
+				DrawSprite(bMeteor, 0, .5, 0,0);
 				float ticks = (float)SDL_GetTicks() / 1000.0f;
 				float elapsed = ticks - lastFrameTicks;
 				lastFrameTicks = ticks;
 				nyanAngle += elapsed;
-				DrawSprite(nyan, -.5, -.5, nyanAngle);
+				DrawSprite(nyan, -.5, -.5, nyanAngle,0);
 
 
-				DrawSprite(Mouse,.5,-.5,270);
+				DrawSprite(Mouse,.5,-.5,270,1);
 				
 
 
