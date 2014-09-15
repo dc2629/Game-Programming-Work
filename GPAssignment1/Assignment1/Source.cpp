@@ -3,7 +3,6 @@
 #include <SDL_image.h>
 #include<iostream>
 #include<string>
-#include<Windows.h>
 #include<stdio.h>
 
 
@@ -61,12 +60,11 @@ int main(int argc, char *argv[])
 	glMatrixMode(GL_PROJECTION);//Usually ran once and thats it.
 	glOrtho(-1.33, 1.33, -1, 1, -1, 1);//The ratio of resolutions
 
-	char* pngLocation = "dnyan.jpg";
+	char* pngLocation = "meteorBig.png";
+
 	SDL_Surface *surface = IMG_Load(pngLocation);
-	//GLint bMeteor = LoadTexture(pngLocation);//Code that makes everything crash.
-	if (!surface){
-		std::cout << "Not Working Buddy" << std::endl;
-	}
+	GLint bMeteor = LoadTexture(pngLocation);//Code that makes everything crash.
+
 
 	while (!done) {
 		while (SDL_PollEvent(&event)) {
@@ -77,7 +75,7 @@ int main(int argc, char *argv[])
 				glClearColor(0.8f, 0.2f, 0.4f, 1.0f);//Determines default coloring
 				glClear(GL_COLOR_BUFFER_BIT);//Makes background default color
 
-		
+				DrawSprite(bMeteor, 0, .5, 0);
 
 
 
