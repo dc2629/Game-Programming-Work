@@ -60,10 +60,8 @@ int main(int argc, char *argv[])
 	glMatrixMode(GL_PROJECTION);//Usually ran once and thats it.
 	glOrtho(-1.33, 1.33, -1, 1, -1, 1);//The ratio of resolutions
 
-	char* pngLocation = "meteorBig.png";
-
-	SDL_Surface *surface = IMG_Load(pngLocation);
-	GLint bMeteor = LoadTexture(pngLocation);//Code that makes everything crash.
+	char* pngLocation = "meteorBig.png";//File needs to be in cpp file location while dlls need to be in exe location.
+	GLint bMeteor = LoadTexture(pngLocation);
 
 
 	while (!done) {
