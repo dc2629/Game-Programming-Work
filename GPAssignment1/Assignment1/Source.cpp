@@ -72,10 +72,18 @@ int main(int argc, char *argv[])
 	float lastFrameTicks = 0.0f;
 	float nyanAngle = 0.0f;
 
+	float posX = 0.0f;
+	float posY = 0.0f;
+
 	while (!done) {
 		while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {//If the Window is closed or the user quits the program, end the loop.
 				done = true;
+			} else if(event.type = SDL_MOUSEMOTION){
+				float unitX = (((float)event.motion.x / 800.0f)*2.66f) - 1.33f;
+				float unitY = (((600.0f - (float)event.motion.y) / 600.0f)*2.0f) - 1.0f;
+				posX = unitX;
+				posY = unitY;
 			}
 		}
 		glClearColor(55.0f / 255.0f, 84.0f / 255.0f, 229.0f / 255.0f, 1.0f);//Determines default coloring
@@ -92,7 +100,7 @@ int main(int argc, char *argv[])
 		glEnableClientState(GL_COLOR_ARRAY);
 		GLfloat cArray[] = { 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0 };
 		glColorPointer(4, GL_FLOAT, 0, cArray);
-		DrawSprite(Mouse, .5, -.5, 270);
+		DrawSprite(Mouse, posX, posY, 270);
 		glDisableClientState(GL_COLOR_ARRAY);
 
 		SDL_GL_SwapWindow(displayWindow);//Something about there being two windows, swap the one that is visible and the one that is being programmed.
