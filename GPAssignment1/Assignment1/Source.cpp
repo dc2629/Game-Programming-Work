@@ -1,3 +1,5 @@
+//#pragma once //For headers usually.
+
 #include <SDL.h>
 #include <SDL_opengl.h>
 #include <SDL_image.h>
@@ -88,7 +90,7 @@ int main(int argc, char *argv[])
 		}
 		glClearColor(55.0f / 255.0f, 84.0f / 255.0f, 229.0f / 255.0f, 1.0f);//Determines default coloring
 		glClear(GL_COLOR_BUFFER_BIT);//Makes background default color
-
+		
 		DrawSprite(bMeteor, 0, .5, 0);
 		float ticks = (float)SDL_GetTicks() / 1000.0f;
 		float elapsed = ticks - lastFrameTicks;
@@ -102,6 +104,13 @@ int main(int argc, char *argv[])
 		glColorPointer(4, GL_FLOAT, 0, cArray);
 		DrawSprite(Mouse, posX, posY, 270);
 		glDisableClientState(GL_COLOR_ARRAY);
+
+		const Uint8 *keys = SDL_GetKeyboardState(NULL);
+			if (keys[SDL_SCANCODE_LEFT]) {
+			
+			}
+			else if (keys[SDL_SCANCODE_RIGHT]) {
+				// go right! 
 
 		SDL_GL_SwapWindow(displayWindow);//Something about there being two windows, swap the one that is visible and the one that is being programmed.
 	}
