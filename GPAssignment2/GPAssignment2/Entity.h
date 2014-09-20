@@ -11,6 +11,7 @@ using namespace std;
 class Entity {
 private:
 	GLuint LoadTexture(const char* image_path);
+
 public:
 	void Draw();
 	float x;
