@@ -37,7 +37,7 @@ void Entity::Draw(){
 	glLoadIdentity();//Resets all sprites.
 	glTranslatef(x, y, 0.0);//move sprites across the window.
 	glRotatef(rotation, 0.0, 0.0, 1.0);//rotations on the z-view.
-	GLfloat quad[] = { -0.5f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f, 0.5f, 0.5f };//Defines a quad to place the image. REMEMBER COUNTER CLOCKWISE LISTING OF VERTICES
+	GLfloat quad[] = { -width / 2, height / 2, -width / 2, -height / 2, width / 2, -height / 2, width / 2, height / 2 };//Defines a quad to place the image. REMEMBER COUNTER CLOCKWISE LISTING OF VERTICES
 	glVertexPointer(2, GL_FLOAT, 0, quad);//Read 2, FLOAT VALUES, SKIP 0 values in case we put colors in the matrix, and quad is the pointer to the array.
 	glEnableClientState(GL_VERTEX_ARRAY);//allows for server to access the vertex arrays and for clients to draw the arrays.
 	GLfloat quadUVs[] = { 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0 };//Not really sure what it does.

@@ -13,6 +13,8 @@ void Setup(){
 	glMatrixMode(GL_PROJECTION);//Usually ran once and thats it.
 	glOrtho(-1.33, 1.33, -1, 1, -1, 1);//The ratio of resolutions
 	cat.textureLocation = "nyan.png";
+	cat.height = 0.2f;
+	cat.width = 0.2f;
 };
 
 bool ProcessEvents(SDL_Event& EVENT){
@@ -21,13 +23,16 @@ bool ProcessEvents(SDL_Event& EVENT){
 			return(true);
 		}
 	}
-
+	return false;
 };
 
 void Update(){
 
 };
 
+void CleanUp(){
+	SDL_Quit();
+}
 
 int main(int argc, char *argv[]){
 
@@ -43,7 +48,7 @@ int main(int argc, char *argv[]){
 		SDL_GL_SwapWindow(displayWindow);//Something about there being two windows, swap the one that is visible and the one that is being programmed.
 	}
 
-	SDL_Quit();
+	CleanUp();
 
 	return 0;
 }
