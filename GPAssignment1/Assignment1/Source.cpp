@@ -22,12 +22,48 @@ GLuint LoadTexture(const char* image_path) {
 	return textureID;
 }
 
+class Entity {
 
+public:
+	void Draw();
+	float x;
+	float y;
+	float rotation;
+	GLint textureID;
+
+	float width;
+	float height;
+	float speed;
+	float direction_x;
+	float direction_y;
+
+};
+Entity cat;
 //A simple sprite system:
 void DrawSprite(GLint texture, float x, float y, float rotation) {
 
 	glEnable(GL_TEXTURE_2D);//enable or disable server-side GL capabilities, in this case enables 2d textures.
 	glBindTexture(GL_TEXTURE_2D, texture);//binds texture to target. Binds an image to the texture map.
+	glMatrixMode(GL_MODELVIEW);//Modelview matrix determines location and angle of the sprites.
+	glLoadIdentity();//Resets all sprites.
+	glTranslatef(x, y, 0.0);//move sprites across the window.
+	glRotatef(rotation, 0.0, 0.0, 1.0);//rotations on the z-view.
+	GLfloat quad[] = { -0.5f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f, 0.5f, 0.5f };//Defines a quad to place the image. REMEMBER COUNTER CLOCKWISE LISTING OF VERTICES
+	glVertexPointer(2, GL_FLOAT, 0, quad);//Read 2, FLOAT VALUES, SKIP 0 values in case we put colors in the matrix, and quad is the pointer to the array.
+	glEnableClientState(GL_VERTEX_ARRAY);//allows for server to access the vertex arrays and for clients to draw the arrays.
+	GLfloat quadUVs[] = { 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0 };//Not really sure what it does.
+	glTexCoordPointer(2, GL_FLOAT, 0, quadUVs);//Defines an array of texture coordinates 
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnable(GL_BLEND);//Enable blending
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);//Alpha blending, basically removing the background of the quad.
+	glDrawArrays(GL_QUADS, 0, 4);//Drawing quads, starting from 0, and draw 4 vertices. 
+	glDisable(GL_TEXTURE_2D);//Disable the texture since OpenGl won't use the same texture when redrawing other quads.
+}
+
+void Entity::Draw() {
+
+	glEnable(GL_TEXTURE_2D);//enable or disable server-side GL capabilities, in this case enables 2d textures.
+	glBindTexture(GL_TEXTURE_2D, textureID);//binds texture to target. Binds an image to the texture map.
 	glMatrixMode(GL_MODELVIEW);//Modelview matrix determines location and angle of the sprites.
 	glLoadIdentity();//Resets all sprites.
 	glTranslatef(x, y, 0.0);//move sprites across the window.
@@ -73,6 +109,8 @@ int main(int argc, char *argv[]){
 	float posX = 0.0f;
 	float posY = 0.0f;
 
+	cat.textureID = LoadTexture("pMouse.png");
+
 	while (!done) {
 		while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {//If the Window is closed or the user quits the program, end the loop.
@@ -86,6 +124,8 @@ int main(int argc, char *argv[]){
 		}
 		glClearColor(55.0f / 255.0f, 84.0f / 255.0f, 229.0f / 255.0f, 1.0f);//Determines default coloring
 		glClear(GL_COLOR_BUFFER_BIT);//Makes background default color
+
+		cat.Draw();
 
 		DrawSprite(bMeteor, 0, .5, 0);
 		float ticks = (float)SDL_GetTicks() / 1000.0f;
