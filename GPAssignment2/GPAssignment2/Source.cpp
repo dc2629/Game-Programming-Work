@@ -2,6 +2,7 @@
 
 SDL_Window* displayWindow;
 
+Entity cat;
 void Setup(){
 	//Main Setup
 	SDL_Init(SDL_INIT_VIDEO);//Initializes SDL
@@ -11,7 +12,7 @@ void Setup(){
 	glViewport(0, 0, 800, 600);//The start of using OpenGL with the arguments as the resolution.
 	glMatrixMode(GL_PROJECTION);//Usually ran once and thats it.
 	glOrtho(-1.33, 1.33, -1, 1, -1, 1);//The ratio of resolutions
-
+	cat.textureLocation = "nyan.png";
 };
 
 bool ProcessEvents(SDL_Event& EVENT){
@@ -30,10 +31,8 @@ void Update(){
 
 int main(int argc, char *argv[]){
 
-	Entity cat("meteorBig.png");
-	std::cout << cat.textureID << std::endl;
-	
 	Setup();
+
 	SDL_Event EVENT; //Logs the I/O of the user
 	bool done = false;//Running/Updating Windows requires loops.
 

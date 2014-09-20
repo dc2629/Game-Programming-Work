@@ -11,7 +11,6 @@ using namespace std;
 class Entity {
 private:
 	GLuint LoadTexture(const char* image_path);
-
 public:
 	void Draw();
 	float x;
@@ -25,11 +24,13 @@ public:
 	float speed;
 	float direction_x;
 	float direction_y;
-	Entity(char* pngLoc = NULL) :textureLocation(pngLoc){ if (textureLocation) textureID = LoadTexture(textureLocation); };
 
 };
 
 void Entity::Draw(){
+	if (!textureID)
+		textureID = LoadTexture(textureLocation);
+	
 	glEnable(GL_TEXTURE_2D);//enable or disable server-side GL capabilities, in this case enables 2d textures.
 	glBindTexture(GL_TEXTURE_2D, textureID);//binds texture to target. Binds an image to the texture map.
 	glMatrixMode(GL_MODELVIEW);//Modelview matrix determines location and angle of the sprites.
@@ -51,7 +52,6 @@ void Entity::Draw(){
 
 GLuint Entity::LoadTexture(const char* image_path) {
 	SDL_Surface *surface = IMG_Load(image_path);
-	cout << surface << endl;
 	GLuint textureID;
 	glGenTextures(1, &textureID);
 	glBindTexture(GL_TEXTURE_2D, textureID);
