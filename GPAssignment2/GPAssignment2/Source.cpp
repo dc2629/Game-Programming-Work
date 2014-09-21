@@ -27,7 +27,9 @@ void Setup(){
 	yarn.textureLocation = "yarn.png";
 	yarn.height = 0.15f;
 	yarn.width = 0.15f;
-
+	yarn.speed = 0.85f;
+	yarn.direction_x = (float) (rand() % 10) / 10;
+	yarn.direction_y = (float) (rand() % 10) / 10;
 
 };
 
@@ -65,6 +67,13 @@ void Update(float& lastFrameTicks){
 		if (Rcat.y>-.9f)
 			Rcat.y -= elapsed * 0.8f;
 	}
+	yarn.x += yarn.direction_x*yarn.speed*elapsed;
+	yarn.y += yarn.direction_y*yarn.speed*elapsed;
+	if (yarn.y > .9)
+		yarn.direction_y = -yarn.direction_y;
+	if (yarn.y <-.9)
+		yarn.direction_y = -yarn.direction_y;
+
 };
 
 void Render(){
