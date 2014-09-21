@@ -25,11 +25,14 @@ void Setup(){
 	Rcat.x = 1.2f;
 
 	yarn.textureLocation = "yarn.png";
+	yarn.x = 0;
+	yarn.y = 0;
 	yarn.height = 0.15f;
 	yarn.width = 0.15f;
 	yarn.speed = 0.85f;
-	yarn.direction_x = (float) (rand() % 10) / 10;
-	yarn.direction_y = (float) (rand() % 10) / 10;
+	yarn.angle = (float)(rand() % 360);
+	yarn.direction_x = (float)(cos(yarn.angle));
+	yarn.direction_y = (float)(sin(yarn.angle));
 
 };
 
@@ -43,6 +46,28 @@ bool ProcessEvents(SDL_Event& EVENT){
 	return false;
 };
 
+bool checkCollision(Entity yarn, Entity cat){
+	float projTop = yarn.y + yarn.height / 2;
+	float projBot = yarn.y - yarn.height / 2;
+	float projRight = yarn.x + yarn.width / 2;
+	float projLeft = yarn.x - yarn.width / 2;
+
+	float cTop = cat.y + cat.height / 2;
+	float cBot = cat.y - cat.height / 2;
+	float cRight = cat.x + cat.width / 2;
+	float cLeft = cat.x - cat.width / 2;
+
+	if ((projLeft <= cRight && projRight >= cLeft) || (projRight >= cLeft && projLeft <= cRight))
+	{
+		if (!(projBot > cTop || projTop < cBot))
+		{
+			cout << "Collision Occurred" << endl;
+			return true;
+		}
+	}
+	return false;
+};
+
 void Update(float& lastFrameTicks){
 	//Fluid Movement is based on fps
 	float ticks = (float)SDL_GetTicks() / 1000.0f;
@@ -51,33 +76,57 @@ void Update(float& lastFrameTicks){
 	//Movement programming for cats
 	const Uint8 *keys = SDL_GetKeyboardState(NULL);
 	if (keys[SDL_SCANCODE_UP]){
-		if (Lcat.y<.9f)
-			Lcat.y += elapsed * 0.8f;
-	}
-	else if (keys[SDL_SCANCODE_DOWN]){
-		if (Lcat.y>-.9f)
-			Lcat.y -= elapsed * 0.8f;
-	}
-	if (keys[SDL_SCANCODE_W]){
 		if (Rcat.y<.9f)
 			Rcat.y += elapsed * 0.8f;
+	}
+	else if (keys[SDL_SCANCODE_DOWN]){
+		if (Rcat.y>-.9f)
+			Rcat.y -= elapsed * 0.8f;
+	}
+	if (keys[SDL_SCANCODE_W]){
+		if (Lcat.y<.9f)
+			Lcat.y += elapsed * 0.8f;
 
 	}
 	else if (keys[SDL_SCANCODE_S]){
-		if (Rcat.y>-.9f)
-			Rcat.y -= elapsed * 0.8f;
+		if (Lcat.y>-.9f)
+			Lcat.y -= elapsed * 0.8f;
 	}
 	yarn.x += yarn.direction_x*yarn.speed*elapsed;
 	yarn.y += yarn.direction_y*yarn.speed*elapsed;
 	if (yarn.y > .9)
 		yarn.direction_y = -yarn.direction_y;
-	if (yarn.y <-.9)
+	if (yarn.y < -.9)
 		yarn.direction_y = -yarn.direction_y;
+	if (yarn.x > 1.6){
+		yarn.x = 0, yarn.y = 0;
+		yarn.angle = (float)(rand() % 360);
+		yarn.direction_x = (float)(cos(yarn.angle));
+		yarn.direction_y = (float)(sin(yarn.angle));
+		cout << "Left Side Wins" << endl;
+
+	}
+	else if (yarn.x < -1.6){
+		yarn.x = 0, yarn.y = 0;
+		yarn.angle = (float)(rand() % 360);
+		yarn.direction_x = (float)(cos(yarn.angle));
+		yarn.direction_y = (float)(sin(yarn.angle));
+		cout << "Right Side Wins!" << endl;
+
+	}
+
+	if (checkCollision(yarn, Rcat)){
+		yarn.direction_x = -yarn.direction_x;
+	}
+
+	if (checkCollision(yarn, Lcat)){
+		yarn.direction_x = -yarn.direction_x;
+	}
 
 };
 
 void Render(){
-	glClearColor(55.0f / 255.0f, 84.0f / 255.0f, 229.0f / 255.0f, 1.0f);//Determines default coloring
+	glClearColor(0.0f, 1.0f, 0.0f, 1.0f);//Determines default coloring
 	glClear(GL_COLOR_BUFFER_BIT);//Makes background default color
 	Lcat.Draw();
 	Rcat.Draw();

@@ -19,6 +19,7 @@ public:
 	GLint textureID;
 	char* textureLocation;
 
+	float angle;
 	float width;
 	float height;
 	float speed;
