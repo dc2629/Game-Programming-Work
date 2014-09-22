@@ -92,8 +92,7 @@ void Update(float& lastFrameTicks){
 		if (Lcat.y>-.9f)
 			Lcat.y -= elapsed * 0.8f;
 	}
-	yarn.x += yarn.direction_x*yarn.speed*elapsed;
-	yarn.y += yarn.direction_y*yarn.speed*elapsed;
+
 	if (yarn.y > .9)
 		yarn.direction_y = -yarn.direction_y;
 	if (yarn.y < -.9)
@@ -123,6 +122,8 @@ void Update(float& lastFrameTicks){
 		yarn.direction_x = -yarn.direction_x;
 	}
 
+	yarn.x += yarn.direction_x*yarn.speed*elapsed;
+	yarn.y += yarn.direction_y*yarn.speed*elapsed;
 };
 
 void Render(){
