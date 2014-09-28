@@ -5,10 +5,10 @@
 SDL_Window* displayWindow;
 
 TextEntity Score;
-float elapsed;
+float elapsed, accumulator;
 Entity Background;
 SSEntity pShip, pShipBullet, AIShip, AIBullet;
-vector<SSEntity> bullets;
+vector<SSEntity> bullets, abullets;
 
 void Setup(){
 	//Main Setup
@@ -20,20 +20,24 @@ void Setup(){
 	glMatrixMode(GL_PROJECTION);//Usually ran once and thats it.
 	glOrtho(-1.33, 1.33, -1, 1, -1, 1);//The ratio of resolutions
 
+	//Background
+	Background.textureLocation = "spacebackground.png";
+	Background.height = 5;
+	Background.width = 5;
+
+	//Score/Health
 	Score.textureLocation = "fontspritesheet.png";
 	Score.a = 1.0;
 	Score.r = 1.0;
 	Score.g = 1.0;
 	Score.b = 0.0;
-	Score.y = 0.85;
-	Score.x = -0.35;
-	Score.size = 0.1;
+	Score.y = -.95;
+	Score.x = 1.3;
+	Score.size = .1;
 	Score.spacing = -0.05;
-	Score.text = "Your Score : 0";
-	Background.textureLocation = "spacebackground.png";
-	Background.height = 5;
-	Background.width = 5;
 
+
+	//Player's Ship Details
 	pShip.textureLocation = "SpaceShooterSprites.png";
 	pShip.spriteCountX = 8;
 	pShip.spriteCountY = 8;
@@ -43,6 +47,8 @@ void Setup(){
 	pShip.width = .1;
 	pShip.x = 0;
 	pShip.y = -0.9;
+	pShip.health = 3;
+	//Player's Bullet Details
 	pShipBullet.textureLocation = "SpaceShooterSprites.png";
 	pShipBullet.rotation = -90.0f;
 	pShipBullet.height = .15;
@@ -51,11 +57,36 @@ void Setup(){
 	pShipBullet.spriteCountY = 8;
 	pShipBullet.index = 32;
 	pShipBullet.speed = 2;
-	pShipBullet.visible = true;
-	pShipBullet.x = pShip.x;
-	pShipBullet.y = pShip.y + 0.05;
-	bullets.push_back(pShipBullet);
-	pShipBullet.visible = false;
+	Score.text = to_string(pShip.health);
+	//AI Ship Details
+	AIShip.textureLocation = "SpaceShooterSprites.png";
+	AIShip.rotation = 90.0f;
+	AIShip.height = .5;
+	AIShip.width = .5;
+	AIShip.spriteCountX = 8;
+	AIShip.spriteCountY = 8;
+	AIShip.index = 20;
+	AIShip.x = 0;
+	AIShip.y = .7;
+	AIShip.speed = .6;
+	AIShip.health = 10;
+	AIShip.direction_x = 1;
+	//AI Bullets
+	AIBullet.textureLocation = "SpaceShooterSprites.png";
+	AIBullet.rotation = 90.0f;
+	AIBullet.height = 0.25;
+	AIBullet.width = 0.15;
+	AIBullet.spriteCountX = 8;
+	AIBullet.spriteCountY = 8;
+	AIBullet.index = 40;
+	AIBullet.speed = -1.2;
+
+
+	accumulator = 0.0;
+
+
+
+
 	elapsed = 0;
 
 };
@@ -69,13 +100,21 @@ bool shouldRemoveBullet(SSEntity bullet) {
 	}
 }
 
-void shootBullet() {
+void shootplayerBullet() {
 	pShipBullet.visible = true;
-	pShipBullet.x = pShip.x;
+	pShipBullet.x = pShip.x - .015;
 	pShipBullet.y = pShip.y + 0.05;
 	bullets.push_back(pShipBullet);
 	pShipBullet.visible = false;
 }
+void shootAIBullet(){
+	AIBullet.visible = true;
+	AIBullet.x = AIShip.x;
+	AIBullet.y = AIShip.y;
+	abullets.push_back(AIBullet);
+	AIBullet.visible = false;
+}
+
 bool ProcessEvents(SDL_Event& EVENT){
 
 	while (SDL_PollEvent(&EVENT)) {
@@ -87,14 +126,14 @@ bool ProcessEvents(SDL_Event& EVENT){
 			pShip.x = unitX;
 		}
 		else if (EVENT.type == SDL_MOUSEBUTTONDOWN){
-			shootBullet();
+			shootplayerBullet();
 
 		}
 	}
 	return false;
 };
 
-bool checkCollision(Entity A, Entity B){
+bool checkCollision(SSEntity A, SSEntity B){
 	float projTop = A.y + A.height / 2;
 	float projBot = A.y - A.height / 2;
 	float projRight = A.x + A.width / 2;
@@ -123,15 +162,34 @@ void Update(float& lastFrameTicks){
 	float ticks = (float)SDL_GetTicks() / 1000.0f;
 	elapsed = ticks - lastFrameTicks;
 	lastFrameTicks = ticks;
+	accumulator += elapsed*1000;
 	//Movement programming
 	//const Uint8 *keys = SDL_GetKeyboardState(NULL);
+	float x = (float)(AIShip.health*100);
 
 	for (int i = 0; i < bullets.size(); i++){
 		bullets[i].y += bullets[i].speed*elapsed;
 		bullets[i].timeAlive += elapsed;
 	}
+	for (int i = 0; i < abullets.size(); i++){
+		abullets[i].y += abullets[i].speed*elapsed;
+		abullets[i].timeAlive += elapsed;
+	}
 
-	
+	if (AIShip.x > 1.3){
+		AIShip.direction_x = -1;
+		AIShip.x = 1.28;
+	}
+	else if (AIShip.x < -1.3){
+		AIShip.direction_x = 1;
+		AIShip.x = -1.28;
+	}
+	AIShip.x += AIShip.speed*elapsed*AIShip.direction_x;
+	while ( (accumulator > x)){
+		shootAIBullet();
+		accumulator = 0;
+	}
+
 };
 
 void Render(){
@@ -141,11 +199,34 @@ void Render(){
 	Background.Draw();
 	Score.DrawText();
 	pShip.DrawSpriteSheetSprite();
+	for (int i = 0; i < abullets.size(); i++){
+		if (abullets[i].visible){
+			abullets[i].DrawSpriteSheetSprite();
+			if (checkCollision(abullets[i], pShip)){
+
+				pShip.health--;
+				Score.text = to_string(pShip.health);
+				abullets[i].visible = false;
+			}
+
+		}
+
+
+	}
 	for (int i = 0; i < bullets.size(); i++){
-		if (bullets[i].visible)
+		if (bullets[i].visible){
 			bullets[i].DrawSpriteSheetSprite();
+			if (checkCollision(bullets[i], AIShip)){
+
+				AIShip.health--;
+				bullets[i].visible = false;
+			}
+
+		}
 	}
 	bullets.erase(remove_if(bullets.begin(), bullets.end(), shouldRemoveBullet), bullets.end());
+
+	AIShip.DrawSpriteSheetSprite();
 
 };
 

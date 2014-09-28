@@ -52,6 +52,7 @@ public:
 	int spriteCountY;
 	bool visible;
 	float timeAlive;
+	int health;
 };
 
 class TextEntity{
