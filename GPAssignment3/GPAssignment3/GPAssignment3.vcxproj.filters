@@ -31,5 +31,8 @@
     <Image Include="SpaceShooterSprites.png">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="spacebackground.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

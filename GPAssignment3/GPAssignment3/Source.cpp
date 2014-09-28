@@ -3,6 +3,7 @@
 SDL_Window* displayWindow;
 
 TextEntity Score;
+Entity Background;
 
 void Setup(){
 	//Main Setup
@@ -24,6 +25,10 @@ void Setup(){
 	Score.size = 0.1;
 	Score.spacing = -0.05;
 	Score.text = "Your Score : 0";
+	Background.textureLocation = "spacebackground.png";
+	Background.height =5;
+	Background.width = 5;
+
 
 };
 
@@ -69,8 +74,10 @@ void Update(float& lastFrameTicks){
 };
 
 void Render(){
-	glClearColor(0.0f, 1.0f, 0.0f, 1.0f);//Determines default coloring
+	//glClearColor(0.0f, 1.0f, 0.0f, 1.0f);//Determines default coloring
 	glClear(GL_COLOR_BUFFER_BIT);//Makes background default color
+	
+	Background.Draw();
 	Score.DrawText();
 };
 

@@ -87,6 +87,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="fontspritesheet.png" />
+    <Image Include="spacebackground.png" />
     <Image Include="SpaceShooterSprites.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

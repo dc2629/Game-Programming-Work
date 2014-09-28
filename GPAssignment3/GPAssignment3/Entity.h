@@ -10,12 +10,13 @@ using namespace std;
 class Entity {
 private:
 	friend GLuint LoadTexture(const char* image_path);
+	GLuint textureID;
 public:
 	void Draw();
 	float x;
 	float y;
 	float rotation;
-	GLint textureID;
+
 	char* textureLocation;
 
 	float angle;
@@ -30,12 +31,13 @@ public:
 class SSEntity{
 private:
 	friend GLuint LoadTexture(const char* image_path);
+	GLuint SStextureID;
 public:
 	void DrawSpriteSheetSprite();
 	float x;
 	float y;
 	float rotation;
-	GLint SStextureID;
+
 	char* textureLocation;
 
 	float angle;
@@ -54,9 +56,10 @@ public:
 class TextEntity{
 private:
 	friend GLuint LoadTexture(const char* image_path);
+	GLuint fontTexture;
 public:
 	void DrawText();
-	int fontTexture;
+
 	string text;
 	float size;
 	float spacing;
@@ -73,7 +76,7 @@ public:
 void Entity::Draw(){
 	if (!textureID)
 		textureID = LoadTexture(textureLocation);
-	
+
 	glEnable(GL_TEXTURE_2D);//enable or disable server-side GL capabilities, in this case enables 2d textures.
 	glBindTexture(GL_TEXTURE_2D, textureID);//binds texture to target. Binds an image to the texture map.
 	glMatrixMode(GL_MODELVIEW);//Modelview matrix determines location and angle of the sprites.
@@ -112,11 +115,8 @@ GLuint LoadTexture(const char* image_path) {
 void TextEntity::DrawText() {
 	if (!fontTexture)
 		fontTexture = LoadTexture(textureLocation);
-
-	glBindTexture(GL_TEXTURE_2D, fontTexture);
 	glEnable(GL_TEXTURE_2D);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBindTexture(GL_TEXTURE_2D, fontTexture);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();//Resets all sprites.
 	glTranslatef(x, y, 0.0);//move sprites across the window.
@@ -140,7 +140,12 @@ void TextEntity::DrawText() {
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glTexCoordPointer(2, GL_FLOAT, 0, texCoordData.data());
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDrawArrays(GL_QUADS, 0, text.size() * 4);
+	glDisable(GL_TEXTURE_2D);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	glDisableClientState(GL_COLOR_ARRAY);
 }
 
 void SSEntity::DrawSpriteSheetSprite() {
