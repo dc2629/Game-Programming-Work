@@ -4,21 +4,22 @@
 
 SDL_Window* displayWindow;
 
-TextEntity Score;
+TextEntity Score, StartScreen, EndScreen;
 float elapsed, accumulator;
 Entity Background;
 SSEntity pShip, pShipBullet, AIShip, AIBullet;
 vector<SSEntity> bullets, abullets;
+int State;
 
 void Setup(){
-	//Main Setup
-	SDL_Init(SDL_INIT_VIDEO);//Initializes SDL
-	displayWindow = SDL_CreateWindow("My Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_OPENGL);//Creates the window with OpenGL and the dimensions of the window.
-	SDL_GLContext context = SDL_GL_CreateContext(displayWindow);
-	SDL_GL_MakeCurrent(displayWindow, context);//Make the window appear?
-	glViewport(0, 0, 800, 600);//The start of using OpenGL with the arguments as the resolution.
-	glMatrixMode(GL_PROJECTION);//Usually ran once and thats it.
-	glOrtho(-1.33, 1.33, -1, 1, -1, 1);//The ratio of resolutions
+	////Main Setup
+	//SDL_Init(SDL_INIT_VIDEO);//Initializes SDL
+	//displayWindow = SDL_CreateWindow("My Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_OPENGL);//Creates the window with OpenGL and the dimensions of the window.
+	//SDL_GLContext context = SDL_GL_CreateContext(displayWindow);
+	//SDL_GL_MakeCurrent(displayWindow, context);//Make the window appear?
+	//glViewport(0, 0, 800, 600);//The start of using OpenGL with the arguments as the resolution.
+	//glMatrixMode(GL_PROJECTION);//Usually ran once and thats it.
+	//glOrtho(-1.33, 1.33, -1, 1, -1, 1);//The ratio of resolutions
 
 	//Background
 	Background.textureLocation = "spacebackground.png";
@@ -68,8 +69,8 @@ void Setup(){
 	AIShip.index = 20;
 	AIShip.x = 0;
 	AIShip.y = .7;
-	AIShip.speed = .6;
-	AIShip.health = 10;
+	AIShip.speed = 1.6;
+	AIShip.health = 20;
 	AIShip.direction_x = 1;
 	//AI Bullets
 	AIBullet.textureLocation = "SpaceShooterSprites.png";
@@ -92,7 +93,7 @@ void Setup(){
 };
 
 bool shouldRemoveBullet(SSEntity bullet) {
-	if (bullet.timeAlive > 3) {
+	if (bullet.timeAlive > 1.5) {
 		return true;
 	}
 	else {
@@ -165,7 +166,7 @@ void Update(float& lastFrameTicks){
 	accumulator += elapsed*1000;
 	//Movement programming
 	//const Uint8 *keys = SDL_GetKeyboardState(NULL);
-	float x = (float)(AIShip.health*100);
+	float x = (float)(AIShip.health*48);
 
 	for (int i = 0; i < bullets.size(); i++){
 		bullets[i].y += bullets[i].speed*elapsed;
@@ -228,22 +229,139 @@ void Render(){
 
 	AIShip.DrawSpriteSheetSprite();
 
+	if (AIShip.health == 0){
+		State = 2;
+	}
+	else if (pShip.health == 0){
+		State = 3;
+		
+	}
+
 };
 
 void CleanUp(){
 	SDL_Quit();
 }
 
+void StartRender(){
+	//glClearColor(1.0f, 0.0f, 0.0f, 1.0f);//Determines default coloring
+	glClear(GL_COLOR_BUFFER_BIT);//Makes background default color
+	StartScreen.DrawText();
+
+
+}
+void StartSetup(){
+	//Main Setup
+	SDL_Init(SDL_INIT_VIDEO);//Initializes SDL
+	displayWindow = SDL_CreateWindow("My Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_OPENGL);//Creates the window with OpenGL and the dimensions of the window.
+	SDL_GLContext context = SDL_GL_CreateContext(displayWindow);
+	SDL_GL_MakeCurrent(displayWindow, context);//Make the window appear?
+	glViewport(0, 0, 800, 600);//The start of using OpenGL with the arguments as the resolution.
+	glMatrixMode(GL_PROJECTION);//Usually ran once and thats it.
+	glOrtho(-1.33, 1.33, -1, 1, -1, 1);//The ratio of resolutions
+
+	//Score/Health
+	StartScreen.textureLocation = "fontspritesheet.png";
+	StartScreen.a = 1.0;
+	StartScreen.r = 1.0;
+	StartScreen.g = 1.0;
+	StartScreen.b = 0.0;
+	StartScreen.y = .8;
+	StartScreen.x = -.7;
+	StartScreen.size = .05;
+	StartScreen.spacing = 0;
+	StartScreen.text = "Click Anywhere to Start Game!";
+
+};
+
+
+bool StartProcessEvents(SDL_Event& EVENT){
+
+	while (SDL_PollEvent(&EVENT)) {
+		if (EVENT.type == SDL_QUIT || EVENT.type == SDL_WINDOWEVENT_CLOSE) {//If the Window is closed or the user quits the program, end the loop.
+			return(true);
+		}
+		else if (EVENT.type == SDL_MOUSEBUTTONDOWN){
+			State = 1;
+		}
+
+	}
+	return false;
+};
+
+
+void EndSetup(){
+	//SDL_Init(SDL_INIT_VIDEO);//Initializes SDL
+	//displayWindow = SDL_CreateWindow("My Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_OPENGL);//Creates the window with OpenGL and the dimensions of the window.
+	//SDL_GLContext context = SDL_GL_CreateContext(displayWindow);
+	//SDL_GL_MakeCurrent(displayWindow, context);//Make the window appear?
+	//glViewport(0, 0, 800, 600);//The start of using OpenGL with the arguments as the resolution.
+	//glMatrixMode(GL_PROJECTION);//Usually ran once and thats it.
+	//glOrtho(-1.33, 1.33, -1, 1, -1, 1);//The ratio of resolutions
+
+	EndScreen.textureLocation = "fontspritesheet.png";
+	EndScreen.a = 1.0;
+	EndScreen.r = 1.0;
+	EndScreen.g = 1.0;
+	EndScreen.b = 0.0;
+	EndScreen.y = .8;
+	EndScreen.x = -.7;
+	EndScreen.size = .05;
+	EndScreen.spacing = 0;
+	EndScreen.text = "Game Over!";
+}
+void EndRender(){
+	glClear(GL_COLOR_BUFFER_BIT);//Makes background default color
+	EndScreen.DrawText();
+
+}
+
+bool EndProcessEvents(SDL_Event& EVENT){
+	while (SDL_PollEvent(&EVENT)) {
+		if (EVENT.type == SDL_QUIT || EVENT.type == SDL_WINDOWEVENT_CLOSE) {//If the Window is closed or the user quits the program, end the loop.
+			return(true);
+		}
+		else if (EVENT.type == SDL_SCANCODE_SPACE){
+			break;
+		}
+		return false;
+	}
+}
+
 int main(int argc, char *argv[]){
-
-	Setup();
-
 	SDL_Event EVENT; //Logs the I/O of the user
 	float lastFrameTicks = 0.0f;
-	while (!ProcessEvents(EVENT)) {
-		Update(lastFrameTicks);
-		Render();
-		SDL_GL_SwapWindow(displayWindow);//Something about there being two windows, swap the one that is visible and the one that is being programmed.
+	State = 0;
+	if (State == 0){
+		StartSetup();
+		while (!StartProcessEvents(EVENT)){
+			StartRender();
+			SDL_GL_SwapWindow(displayWindow);
+			if (State == 1)
+				break;
+		}
+	}
+	if (State == 1){
+		Setup();
+
+
+		while (!ProcessEvents(EVENT)) {
+			Update(lastFrameTicks);
+			Render();
+			SDL_GL_SwapWindow(displayWindow);//Something about there being two windows, swap the one that is visible and the one that is being programmed.
+			if (State == 2)
+				break;
+		}
+
+	} 
+	if (State ==2){
+		EndSetup();
+		while (!EndProcessEvents(EVENT)){
+			EndRender();
+			SDL_GL_SwapWindow(displayWindow);
+
+		}
+		
 	}
 
 	CleanUp();
