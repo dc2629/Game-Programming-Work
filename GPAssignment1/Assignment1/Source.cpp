@@ -1,157 +1,207 @@
 #include <SDL.h>
 #include <SDL_opengl.h>
 #include <SDL_image.h>
-#include<iostream>
-#include<string>
-#include<stdio.h>
-#include<math.h>
-
+#include<functional>
 SDL_Window* displayWindow;
 
-//Loading Textures from images, use PNG file storage type. Retuns unsigned GL int.
-GLuint LoadTexture(const char* image_path) {
-	SDL_Surface *surface = IMG_Load(image_path);
-	GLuint textureID;
-	glGenTextures(1, &textureID);
-	glBindTexture(GL_TEXTURE_2D, textureID);
-	glTexImage2D(GL_TEXTURE_2D, 0, 4, surface->w, surface->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, surface->pixels);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	SDL_FreeSurface(surface);
 
-	return textureID;
-}
-
-class Entity {
-
-public:
-	void Draw();
+typedef struct {
 	float x;
 	float y;
-	float rotation;
-	GLint textureID;
 
+	float r;
+	float g;
+	float b;
+} Vertex2D;
+
+void wait(float elapsed) {
+	float thistime = (float)SDL_GetTicks() / 1000.0f;
+	while (elapsed <= 1 / 30) {
+		float nexttime = (float)SDL_GetTicks() / 1000.0f;
+		elapsed += nexttime - thistime;
+	}
+}
+class Entity {
+public:
+	Entity(float w, float h, float initx, float inity, float dx = 0, float dy = 0, float speed = 25.0f) : width(w), height(h), x(initx), y(inity), directionX(dx), directionY(dy), speed(speed) {}
 	float width;
 	float height;
+	float x;
+	float y;
+	float rotation = 0;
+
 	float speed;
-	float direction_x;
-	float direction_y;
-
+	float  directionX;
+	float  directionY;
+	void draw() {
+		glLoadIdentity();
+		glTranslatef(x, y, 0.0);
+		glRotatef(rotation, 0.0, 0.0, 1.0);
+		GLfloat quad[] = { -width / 2, height / 2, -width / 2, -height / 2, width / 2, -height / 2, width / 2, height / 2 };
+		glVertexPointer(2, GL_FLOAT, 0, quad);
+		glEnableClientState(GL_VERTEX_ARRAY);
+		glDrawArrays(GL_QUADS, 0, 4);
+	}
+	void reset() {
+		x = 0;
+		y = 0;
+	}
 };
-Entity cat;
-//A simple sprite system:
-void DrawSprite(GLint texture, float x, float y, float rotation) {
 
-	glEnable(GL_TEXTURE_2D);//enable or disable server-side GL capabilities, in this case enables 2d textures.
-	glBindTexture(GL_TEXTURE_2D, texture);//binds texture to target. Binds an image to the texture map.
-	glMatrixMode(GL_MODELVIEW);//Modelview matrix determines location and angle of the sprites.
-	glLoadIdentity();//Resets all sprites.
-	glTranslatef(x, y, 0.0);//move sprites across the window.
-	glRotatef(rotation, 0.0, 0.0, 1.0);//rotations on the z-view.
-	GLfloat quad[] = { -0.5f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f, 0.5f, 0.5f };//Defines a quad to place the image. REMEMBER COUNTER CLOCKWISE LISTING OF VERTICES
-	glVertexPointer(2, GL_FLOAT, 0, quad);//Read 2, FLOAT VALUES, SKIP 0 values in case we put colors in the matrix, and quad is the pointer to the array.
-	glEnableClientState(GL_VERTEX_ARRAY);//allows for server to access the vertex arrays and for clients to draw the arrays.
-	GLfloat quadUVs[] = { 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0 };//Not really sure what it does.
-	glTexCoordPointer(2, GL_FLOAT, 0, quadUVs);//Defines an array of texture coordinates 
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	glEnable(GL_BLEND);//Enable blending
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);//Alpha blending, basically removing the background of the quad.
-	glDrawArrays(GL_QUADS, 0, 4);//Drawing quads, starting from 0, and draw 4 vertices. 
-	glDisable(GL_TEXTURE_2D);//Disable the texture since OpenGl won't use the same texture when redrawing other quads.
+void newColor() {
+	float r = (rand() % 255) / 255.0;
+	float g = (rand() % 255) / 255.0;
+	float b = (rand() % 255) / 255.0;
+	glClearColor(r, g, b, 0.5f);
 }
 
-void Entity::Draw() {
-
-	glEnable(GL_TEXTURE_2D);//enable or disable server-side GL capabilities, in this case enables 2d textures.
-	glBindTexture(GL_TEXTURE_2D, textureID);//binds texture to target. Binds an image to the texture map.
-	glMatrixMode(GL_MODELVIEW);//Modelview matrix determines location and angle of the sprites.
-	glLoadIdentity();//Resets all sprites.
-	glTranslatef(x, y, 0.0);//move sprites across the window.
-	glRotatef(rotation, 0.0, 0.0, 1.0);//rotations on the z-view.
-	GLfloat quad[] = { -0.5f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f, 0.5f, 0.5f };//Defines a quad to place the image. REMEMBER COUNTER CLOCKWISE LISTING OF VERTICES
-	glVertexPointer(2, GL_FLOAT, 0, quad);//Read 2, FLOAT VALUES, SKIP 0 values in case we put colors in the matrix, and quad is the pointer to the array.
-	glEnableClientState(GL_VERTEX_ARRAY);//allows for server to access the vertex arrays and for clients to draw the arrays.
-	GLfloat quadUVs[] = { 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 0.0 };//Not really sure what it does.
-	glTexCoordPointer(2, GL_FLOAT, 0, quadUVs);//Defines an array of texture coordinates 
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	glEnable(GL_BLEND);//Enable blending
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);//Alpha blending, basically removing the background of the quad.
-	glDrawArrays(GL_QUADS, 0, 4);//Drawing quads, starting from 0, and draw 4 vertices. 
-	glDisable(GL_TEXTURE_2D);//Disable the texture since OpenGl won't use the same texture when redrawing other quads.
-}
-
-int main(int argc, char *argv[]){
-	//Main Setup
-	SDL_Init(SDL_INIT_VIDEO);//Initializes SDL
-	displayWindow = SDL_CreateWindow("My Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_OPENGL);//Creates the window with OpenGL and the dimensions of the window.
+void setup(){
+	SDL_Init(SDL_INIT_VIDEO);
+	displayWindow = SDL_CreateWindow("My Game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_OPENGL);
 	SDL_GLContext context = SDL_GL_CreateContext(displayWindow);
-	SDL_GL_MakeCurrent(displayWindow, context);//Make the window appear?
+	SDL_GL_MakeCurrent(displayWindow, context);
+	glViewport(0, 0, 800, 600);
+	newColor();
+	glMatrixMode(GL_PROJECTION);
+	glOrtho(-1.33f, 1.33f, -1.0f, 1.0f, -1.0f, 1.0f);
 
-	bool done = false;//Running/Updating Windows requires loops.
+}
 
-	SDL_Event event; //Logs the I/O of the user
-
-	glViewport(0, 0, 800, 600);//The start of using OpenGL with the arguments as the resolution.
-	glMatrixMode(GL_PROJECTION);//Usually ran once and thats it.
-	glOrtho(-1.33, 1.33, -1, 1, -1, 1);//The ratio of resolutions
-
-	char* pngLocation = "meteorBig.png";//File needs to be in cpp file location while dlls need to be in exe location.
-	GLint bMeteor = LoadTexture(pngLocation);
-
-	char* png2location = "nyan.png";
-	GLint nyan = LoadTexture(png2location);
-
-	char* png3location = "pMouse.png";
-	GLint Mouse = LoadTexture(png3location);
-
-	float lastFrameTicks = 0.0f;
-	float nyanAngle = 0.0f;
-	float posX = 0.0f;
-	float posY = 0.0f;
-
-	cat.textureID = LoadTexture("pMouse.png");
-
-	while (!done) {
-		while (SDL_PollEvent(&event)) {
-			if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {//If the Window is closed or the user quits the program, end the loop.
-				done = true;
-			} else if(event.type = SDL_MOUSEMOTION){
-				float unitX = (((float)event.motion.x / 800.0f)*2.66f) - 1.33f;
-				float unitY = (((600.0f - (float)event.motion.y) / 600.0f)*2.0f) - 1.0f;
-				posX = unitX;
-				posY = unitY;
+bool processEvents(Entity& p1, Entity& p2){
+	SDL_Event event;
+	while (SDL_PollEvent(&event)) {
+		if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
+			return true;
+		}
+		
+			/*if (event.key.keysym.scancode == SDL_SCANCODE_W) {
+			p1.directionY = 1.0f;
 			}
+			else if (event.key.keysym.scancode == SDL_SCANCODE_S){
+			p1.directionY = -1.0f;
+			}
+			if (event.key.keysym.scancode == SDL_SCANCODE_UP) {
+			p2.directionY = 1.0f;
+			}
+			else if (event.key.keysym.scancode == SDL_SCANCODE_DOWN){
+			p2.directionY = -1.0f;
+			}*/
+			const Uint8 *keys = SDL_GetKeyboardState(NULL);
+			if (keys[SDL_SCANCODE_W])p1.directionY = 1.0f;
+			else if (keys[SDL_SCANCODE_S]) p1.directionY = -1.0f;
+			else p1.directionY = 0.0f;
+
+			if (keys[SDL_SCANCODE_UP])p2.directionY = 1.0f;
+			else if (keys[SDL_SCANCODE_DOWN]) p2.directionY = -1.0f;
+			else p2.directionY = 0.0f;
+		
+	}
+}
+
+void update(Entity& p1, Entity& p2, Entity& ball, float elapsed){
+	float p1top = p1.y + p1.height / 2;
+	float p1bot = p1.y - p1.height / 2;
+	float p1right = p1.x + p1.width / 2;
+	float p2top = p2.y + p2.height / 2;
+	float p2bot = p2.y - p2.height / 2;
+	float p2right = p2.x + p2.width / 2;
+	float p2left = p2.x - p2.width / 2;
+	float bleft = ball.x - ball.width / 2;
+	float bright = ball.x + ball.width / 2;
+	float btop = ball.y + ball.height / 2;
+	float bbot = ball.y - ball.height / 2;
+
+	//Your paddle movement is not working well. Polling is done outside of the event area.
+	if (p1.directionY > 0){
+		if (p1top < 1.0){
+			p1.y += p1.speed * elapsed * p1.directionY;
+			p1.directionY = 0.0f;
 		}
-		glClearColor(55.0f / 255.0f, 84.0f / 255.0f, 229.0f / 255.0f, 1.0f);//Determines default coloring
-		glClear(GL_COLOR_BUFFER_BIT);//Makes background default color
-
-		cat.Draw();
-
-		DrawSprite(bMeteor, 0, .5, 0);
-		float ticks = (float)SDL_GetTicks() / 1000.0f;
-		float elapsed = ticks - lastFrameTicks;
-		lastFrameTicks = ticks;
-		nyanAngle += elapsed*45.0f;
-		DrawSprite(nyan, -.5, -.5, nyanAngle);
-
-		//Coloring specific sprites
-		glEnableClientState(GL_COLOR_ARRAY);
-		GLfloat cArray[] = { 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0 };
-		glColorPointer(4, GL_FLOAT, 0, cArray);
-		DrawSprite(Mouse, posX, posY, 270);
-		glDisableClientState(GL_COLOR_ARRAY);
-
-		const Uint8 *keys = SDL_GetKeyboardState(NULL);
-		if (keys[SDL_SCANCODE_LEFT]) {
-
+	}
+	else if (p1.directionY < 0){
+		if (p1bot > -1.0){
+			p1.y += p1.speed * elapsed * p1.directionY;
+			p1.directionY = 0.0f;
 		}
-		else if (keys[SDL_SCANCODE_RIGHT]) {
-			
-		}
-		SDL_GL_SwapWindow(displayWindow);//Something about there being two windows, swap the one that is visible and the one that is being programmed.
 	}
 
-	SDL_Quit();
+	if (p2.directionY > 0){
+		if (p2top < 1.0){
+			p2.y += p2.speed * elapsed * p2.directionY;
+			p2.directionY = 0.0f;
+		}
+	}
+	else if (p2.directionY < 0){
+		if (p2bot > -1.0){
+			p2.y += p2.speed * elapsed * p2.directionY;
+			p2.directionY = 0.0f;
+		}
+	}
 
+
+	if (bleft <= p1right) { // checking if bleft == p1right does not work??
+		if ((btop > p1top && p1top >= bbot) || ((p1top >= btop) && (bbot >= p1bot)) || (btop >= p1bot && p1bot > bbot)) {
+			ball.directionX = 1.0; // ball.direction *= -1.0 also doesnt work the way it should, so im hardwireing values
+		}
+	}
+	if (bright >= p2left) {
+		if ((btop > p2top && p2top >= bbot) || ((p2top >= btop) && (bbot >= p2bot)) || (btop >= p2bot && p2bot > bbot)) {
+			ball.directionX = -1.0;
+		}
+	}
+	if (btop >= 1.0f) {
+
+		ball.directionY = -1;
+	}
+	if (bbot <= -1.0f) {
+		ball.directionY = 1;
+
+	}
+	ball.y += ((ball.directionY)*(ball.speed)*(elapsed));
+	ball.x += ball.directionX*ball.speed *elapsed;
+	if (ball.x < -1.33 || ball.x > 1.33){
+		newColor();
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		ball.reset();
+	}
+
+}
+
+
+
+void cleanup(){
+	SDL_Quit();
+}
+
+void render(Entity& p1, Entity& p2, Entity& ball){
+
+	p1.draw();
+	p2.draw();
+	ball.draw();
+
+}
+
+int main(int argc, char *argv[])
+{
+	Entity paddle1(0.05f, 0.5f, -1.33 + 0.05 / 2, 0), paddle2(0.05f, 0.5f, 1.33 - 0.05 / 2, 0);
+	Entity ball(0.1, 0.1, 0, 0, -1, 1, 0.5f);
+	setup();
+	glMatrixMode(GL_MODELVIEW);
+	bool done = false;
+	float lastTick = 0;
+	while (!done){
+		done = processEvents(paddle1, paddle2);
+		glClear(GL_COLOR_BUFFER_BIT);
+		float ticks = (float)SDL_GetTicks() / 1000.0f;
+		float elapsed = ticks - lastTick;
+		lastTick = ticks;
+		update(paddle1, paddle2, ball, elapsed);
+		render(paddle1, paddle2, ball);
+		wait(elapsed);//somehow makes paddle more responsive
+
+		SDL_GL_SwapWindow(displayWindow);
+	}
+	cleanup();
 	return 0;
 }
