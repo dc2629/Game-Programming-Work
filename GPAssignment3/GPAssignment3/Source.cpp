@@ -1,9 +1,14 @@
 #include"Entity.h"
+#include<iostream>
+#include<algorithm>
 
 SDL_Window* displayWindow;
 
 TextEntity Score;
+float elapsed;
 Entity Background;
+SSEntity pShip, pShipBullet, AIShip, AIBullet;
+vector<SSEntity> bullets;
 
 void Setup(){
 	//Main Setup
@@ -15,7 +20,7 @@ void Setup(){
 	glMatrixMode(GL_PROJECTION);//Usually ran once and thats it.
 	glOrtho(-1.33, 1.33, -1, 1, -1, 1);//The ratio of resolutions
 
-	Score.textureLocation="fontspritesheet.png";
+	Score.textureLocation = "fontspritesheet.png";
 	Score.a = 1.0;
 	Score.r = 1.0;
 	Score.g = 1.0;
@@ -26,18 +31,65 @@ void Setup(){
 	Score.spacing = -0.05;
 	Score.text = "Your Score : 0";
 	Background.textureLocation = "spacebackground.png";
-	Background.height =5;
+	Background.height = 5;
 	Background.width = 5;
 
+	pShip.textureLocation = "SpaceShooterSprites.png";
+	pShip.spriteCountX = 8;
+	pShip.spriteCountY = 8;
+	pShip.index = 19;
+	pShip.rotation = -90.0f;
+	pShip.height = .1;
+	pShip.width = .1;
+	pShip.x = 0;
+	pShip.y = -0.9;
+	pShipBullet.textureLocation = "SpaceShooterSprites.png";
+	pShipBullet.rotation = -90.0f;
+	pShipBullet.height = .15;
+	pShipBullet.width = .1;
+	pShipBullet.spriteCountX = 8;
+	pShipBullet.spriteCountY = 8;
+	pShipBullet.index = 32;
+	pShipBullet.speed = 2;
+	pShipBullet.visible = true;
+	pShipBullet.x = pShip.x;
+	pShipBullet.y = pShip.y + 0.05;
+	bullets.push_back(pShipBullet);
+	pShipBullet.visible = false;
+	elapsed = 0;
 
 };
 
+bool shouldRemoveBullet(SSEntity bullet) {
+	if (bullet.timeAlive > 3) {
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
+void shootBullet() {
+	pShipBullet.visible = true;
+	pShipBullet.x = pShip.x;
+	pShipBullet.y = pShip.y + 0.05;
+	bullets.push_back(pShipBullet);
+	pShipBullet.visible = false;
+}
 bool ProcessEvents(SDL_Event& EVENT){
+
 	while (SDL_PollEvent(&EVENT)) {
 		if (EVENT.type == SDL_QUIT || EVENT.type == SDL_WINDOWEVENT_CLOSE) {//If the Window is closed or the user quits the program, end the loop.
 			return(true);
 		}
+		else if (EVENT.type == SDL_MOUSEMOTION){
+			float unitX = (((float)EVENT.motion.x / 800.0f)*2.66f) - 1.33f;
+			pShip.x = unitX;
+		}
+		else if (EVENT.type == SDL_MOUSEBUTTONDOWN){
+			shootBullet();
 
+		}
 	}
 	return false;
 };
@@ -57,28 +109,44 @@ bool checkCollision(Entity A, Entity B){
 	{
 		if (!(projBot > cTop || projTop < cBot))
 		{
-			//Output for player, when collision occurs.
+			//Output for pShip, when collision occurs.
 			return true;
 		}
 	}
 	return false;
 };
 
+
+
 void Update(float& lastFrameTicks){
 	//Fluid Movement is based on fps
 	float ticks = (float)SDL_GetTicks() / 1000.0f;
-	float elapsed = ticks - lastFrameTicks;
+	elapsed = ticks - lastFrameTicks;
 	lastFrameTicks = ticks;
-	//Movement programming for Bs
+	//Movement programming
+	//const Uint8 *keys = SDL_GetKeyboardState(NULL);
+
+	for (int i = 0; i < bullets.size(); i++){
+		bullets[i].y += bullets[i].speed*elapsed;
+		bullets[i].timeAlive += elapsed;
+	}
+
 	
 };
 
 void Render(){
 	//glClearColor(0.0f, 1.0f, 0.0f, 1.0f);//Determines default coloring
 	glClear(GL_COLOR_BUFFER_BIT);//Makes background default color
-	
+
 	Background.Draw();
 	Score.DrawText();
+	pShip.DrawSpriteSheetSprite();
+	for (int i = 0; i < bullets.size(); i++){
+		if (bullets[i].visible)
+			bullets[i].DrawSpriteSheetSprite();
+	}
+	bullets.erase(remove_if(bullets.begin(), bullets.end(), shouldRemoveBullet), bullets.end());
+
 };
 
 void CleanUp(){
@@ -91,7 +159,6 @@ int main(int argc, char *argv[]){
 
 	SDL_Event EVENT; //Logs the I/O of the user
 	float lastFrameTicks = 0.0f;
-
 	while (!ProcessEvents(EVENT)) {
 		Update(lastFrameTicks);
 		Render();
