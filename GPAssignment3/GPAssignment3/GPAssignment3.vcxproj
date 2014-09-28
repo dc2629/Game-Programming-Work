@@ -85,6 +85,10 @@
   <ItemGroup>
     <ClInclude Include="Entity.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="fontspritesheet.png" />
+    <Image Include="SpaceShooterSprites.png" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

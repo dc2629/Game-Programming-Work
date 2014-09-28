@@ -2,6 +2,8 @@
 
 SDL_Window* displayWindow;
 
+TextEntity Score;
+
 void Setup(){
 	//Main Setup
 	SDL_Init(SDL_INIT_VIDEO);//Initializes SDL
@@ -12,7 +14,17 @@ void Setup(){
 	glMatrixMode(GL_PROJECTION);//Usually ran once and thats it.
 	glOrtho(-1.33, 1.33, -1, 1, -1, 1);//The ratio of resolutions
 
-	
+	Score.textureLocation="fontspritesheet.png";
+	Score.a = 1.0;
+	Score.r = 1.0;
+	Score.g = 1.0;
+	Score.b = 0.0;
+	Score.y = 0.85;
+	Score.x = -0.35;
+	Score.size = 0.1;
+	Score.spacing = -0.05;
+	Score.text = "Your Score : 0";
+
 };
 
 bool ProcessEvents(SDL_Event& EVENT){
@@ -40,7 +52,7 @@ bool checkCollision(Entity A, Entity B){
 	{
 		if (!(projBot > cTop || projTop < cBot))
 		{
-			cout << "Collision Occurred" << endl;
+			//Output for player, when collision occurs.
 			return true;
 		}
 	}
@@ -59,7 +71,7 @@ void Update(float& lastFrameTicks){
 void Render(){
 	glClearColor(0.0f, 1.0f, 0.0f, 1.0f);//Determines default coloring
 	glClear(GL_COLOR_BUFFER_BIT);//Makes background default color
-
+	Score.DrawText();
 };
 
 void CleanUp(){
