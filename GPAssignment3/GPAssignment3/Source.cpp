@@ -8,7 +8,7 @@ TextEntity Score, StartScreen, EndScreen;
 float elapsed, accumulator;
 Entity Background;
 SSEntity pShip, pShipBullet, AIShip, AIBullet;
-vector<SSEntity> bullets, abullets;
+vector<SSEntity> bullets, abullets, AIShips;
 int State;
 
 void Setup(){
@@ -70,8 +70,14 @@ void Setup(){
 	AIShip.x = 0;
 	AIShip.y = .7;
 	AIShip.speed = 1.6;
-	AIShip.health = 20;
+	AIShip.health = 10;
 	AIShip.direction_x = 1;
+	AIShips.push_back(AIShip);
+	AIShip.y = .45;
+	AIShip.height = .25;
+	AIShip.width = .25;
+	AIShip.speed = 1.2;
+	AIShips.push_back(AIShip);
 	//AI Bullets
 	AIBullet.textureLocation = "SpaceShooterSprites.png";
 	AIBullet.rotation = 90.0f;
@@ -81,7 +87,6 @@ void Setup(){
 	AIBullet.spriteCountY = 8;
 	AIBullet.index = 40;
 	AIBullet.speed = -1.2;
-
 
 	accumulator = 0.0;
 
@@ -108,10 +113,11 @@ void shootplayerBullet() {
 	bullets.push_back(pShipBullet);
 	pShipBullet.visible = false;
 }
-void shootAIBullet(){
+void shootAIBullet(int n){
 	AIBullet.visible = true;
-	AIBullet.x = AIShip.x;
-	AIBullet.y = AIShip.y;
+	AIBullet.x = AIShips[n].x;
+	AIBullet.y = AIShips[n].y;
+	AIBullet.angle = rand() % 90;
 	abullets.push_back(AIBullet);
 	AIBullet.visible = false;
 }
@@ -120,6 +126,7 @@ bool ProcessEvents(SDL_Event& EVENT){
 
 	while (SDL_PollEvent(&EVENT)) {
 		if (EVENT.type == SDL_QUIT || EVENT.type == SDL_WINDOWEVENT_CLOSE) {//If the Window is closed or the user quits the program, end the loop.
+			State = 4;
 			return(true);
 		}
 		else if (EVENT.type == SDL_MOUSEMOTION){
@@ -163,10 +170,10 @@ void Update(float& lastFrameTicks){
 	float ticks = (float)SDL_GetTicks() / 1000.0f;
 	elapsed = ticks - lastFrameTicks;
 	lastFrameTicks = ticks;
-	accumulator += elapsed*1000;
+	accumulator += elapsed * 1000;
 	//Movement programming
 	//const Uint8 *keys = SDL_GetKeyboardState(NULL);
-	float x = (float)(AIShip.health*48);
+	float x = (float)(AIShip.health * 40);
 
 	for (int i = 0; i < bullets.size(); i++){
 		bullets[i].y += bullets[i].speed*elapsed;
@@ -174,20 +181,27 @@ void Update(float& lastFrameTicks){
 	}
 	for (int i = 0; i < abullets.size(); i++){
 		abullets[i].y += abullets[i].speed*elapsed;
+		abullets[i].x += cos(abullets[i].angle)*abullets[i].speed*elapsed;
 		abullets[i].timeAlive += elapsed;
 	}
+	for (int i = 0; i < 2; i++){
+		if (AIShips[i].x > 1.3){
+			AIShips[i].direction_x = -1;
+			AIShips[i].x = 1.28;
+		}
+		else if (AIShips[i].x < -1.3){
+			AIShips[i].direction_x = 1;
+			AIShips[i].x = -1.28;
+		}
+		AIShips[i].x += AIShips[i].speed*elapsed*AIShips[i].direction_x;
 
-	if (AIShip.x > 1.3){
-		AIShip.direction_x = -1;
-		AIShip.x = 1.28;
 	}
-	else if (AIShip.x < -1.3){
-		AIShip.direction_x = 1;
-		AIShip.x = -1.28;
-	}
-	AIShip.x += AIShip.speed*elapsed*AIShip.direction_x;
-	while ( (accumulator > x)){
-		shootAIBullet();
+
+	while ((accumulator > x)){
+		if (AIShips[0].health > 0)
+			shootAIBullet(0);
+		if (AIShips[1].health > 0)
+			shootAIBullet(1);
 		accumulator = 0;
 	}
 
@@ -217,25 +231,32 @@ void Render(){
 	for (int i = 0; i < bullets.size(); i++){
 		if (bullets[i].visible){
 			bullets[i].DrawSpriteSheetSprite();
-			if (checkCollision(bullets[i], AIShip)){
+			if (checkCollision(bullets[i], AIShips[0])){
 
-				AIShip.health--;
+				AIShips[0].health--;
+				bullets[i].visible = false;
+			}
+			if (checkCollision(bullets[i], AIShips[1])){
+
+				AIShips[1].health--;
 				bullets[i].visible = false;
 			}
 
 		}
 	}
 	bullets.erase(remove_if(bullets.begin(), bullets.end(), shouldRemoveBullet), bullets.end());
-
-	AIShip.DrawSpriteSheetSprite();
-
-	if (AIShip.health == 0){
+	for (int i = 0; i < 2; i++){
+		if (AIShips[i].health > 0)
+			AIShips[i].DrawSpriteSheetSprite();
+	}
+	if (AIShips[0].health <= 0 && AIShips[1].health <= 0){
 		State = 2;
 	}
-	else if (pShip.health == 0){
+	else if (pShip.health <= 0){
 		State = 3;
-		
+
 	}
+
 
 };
 
@@ -279,6 +300,7 @@ bool StartProcessEvents(SDL_Event& EVENT){
 
 	while (SDL_PollEvent(&EVENT)) {
 		if (EVENT.type == SDL_QUIT || EVENT.type == SDL_WINDOWEVENT_CLOSE) {//If the Window is closed or the user quits the program, end the loop.
+			State = 4;
 			return(true);
 		}
 		else if (EVENT.type == SDL_MOUSEBUTTONDOWN){
@@ -305,10 +327,13 @@ void EndSetup(){
 	EndScreen.g = 1.0;
 	EndScreen.b = 0.0;
 	EndScreen.y = .8;
-	EndScreen.x = -.7;
+	EndScreen.x = -.8;
 	EndScreen.size = .05;
 	EndScreen.spacing = 0;
-	EndScreen.text = "Game Over!";
+	if (State == 3)
+		EndScreen.text = "Game Over! YOU LOSE!!!";
+	if (State == 2)
+		EndScreen.text = "Good Job, You Win!!!";
 }
 void EndRender(){
 	glClear(GL_COLOR_BUFFER_BIT);//Makes background default color
@@ -319,19 +344,20 @@ void EndRender(){
 bool EndProcessEvents(SDL_Event& EVENT){
 	while (SDL_PollEvent(&EVENT)) {
 		if (EVENT.type == SDL_QUIT || EVENT.type == SDL_WINDOWEVENT_CLOSE) {//If the Window is closed or the user quits the program, end the loop.
+			State = 4;
 			return(true);
 		}
-		else if (EVENT.type == SDL_SCANCODE_SPACE){
-			break;
-		}
-		return false;
+
 	}
+	return false;
 }
+
 
 int main(int argc, char *argv[]){
 	SDL_Event EVENT; //Logs the I/O of the user
 	float lastFrameTicks = 0.0f;
 	State = 0;
+
 	if (State == 0){
 		StartSetup();
 		while (!StartProcessEvents(EVENT)){
@@ -349,19 +375,19 @@ int main(int argc, char *argv[]){
 			Update(lastFrameTicks);
 			Render();
 			SDL_GL_SwapWindow(displayWindow);//Something about there being two windows, swap the one that is visible and the one that is being programmed.
-			if (State == 2)
+			if (State == 2 || State == 3)
 				break;
 		}
 
-	} 
-	if (State ==2){
+	}
+	if (State != 1 || State != 0){
 		EndSetup();
 		while (!EndProcessEvents(EVENT)){
 			EndRender();
 			SDL_GL_SwapWindow(displayWindow);
 
 		}
-		
+
 	}
 
 	CleanUp();
