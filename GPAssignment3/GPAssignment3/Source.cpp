@@ -86,7 +86,7 @@ void Setup(){
 	AIBullet.spriteCountX = 8;
 	AIBullet.spriteCountY = 8;
 	AIBullet.index = 40;
-	AIBullet.speed = -1.2;
+	AIBullet.speed = -1.6;
 
 	accumulator = 0.0;
 
