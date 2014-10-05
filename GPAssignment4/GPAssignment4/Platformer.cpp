@@ -99,7 +99,7 @@ DemoApp::~DemoApp(){
 }
 
 void DemoApp::GameRender(){
-	genEnemy.Draw();
+	//genEnemy.Draw();
 	//for (int i = 0; i < MAX_ENEMIES; i++){
 	//	enemies[i].Draw();
 	//	//cout << "Why is it not drawing?" << endl;
@@ -111,7 +111,7 @@ void DemoApp::Render(){
 
 	glClear(GL_COLOR_BUFFER_BIT);
 	genEnemy.Draw();
-	cout << genEnemy.textureID << endl;
+
 	//if (State == STATE_GAME_LEVEL){
 	//	GameRender();
 	//}
