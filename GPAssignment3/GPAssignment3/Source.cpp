@@ -37,9 +37,10 @@ void Setup(){
 	Score.size = .1;
 	Score.spacing = -0.05;
 
+	GLuint SpriteSheetID = LoadTexture("SpaceShooterSprites.png");
 
 	//Player's Ship Details
-	pShip.textureLocation = "SpaceShooterSprites.png";
+	pShip.SStextureID = SpriteSheetID;
 	pShip.spriteCountX = 8;
 	pShip.spriteCountY = 8;
 	pShip.index = 19;
@@ -50,7 +51,7 @@ void Setup(){
 	pShip.y = -0.9;
 	pShip.health = 3;
 	//Player's Bullet Details
-	pShipBullet.textureLocation = "SpaceShooterSprites.png";
+	pShipBullet.SStextureID = SpriteSheetID;
 	pShipBullet.rotation = -90.0f;
 	pShipBullet.height = .15;
 	pShipBullet.width = .1;
@@ -60,7 +61,7 @@ void Setup(){
 	pShipBullet.speed = 2;
 	Score.text = to_string(pShip.health);
 	//AI Ship Details
-	AIShip.textureLocation = "SpaceShooterSprites.png";
+	AIShip.SStextureID = SpriteSheetID;
 	AIShip.rotation = 90.0f;
 	AIShip.height = .5;
 	AIShip.width = .5;
@@ -79,7 +80,7 @@ void Setup(){
 	AIShip.speed = 1.2;
 	AIShips.push_back(AIShip);
 	//AI Bullets
-	AIBullet.textureLocation = "SpaceShooterSprites.png";
+	AIBullet.SStextureID = SpriteSheetID;
 	AIBullet.rotation = 90.0f;
 	AIBullet.height = 0.25;
 	AIBullet.width = 0.15;

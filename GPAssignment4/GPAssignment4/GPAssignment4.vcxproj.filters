@@ -18,17 +18,26 @@
     <ClCompile Include="Source.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Platformer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Entity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Entities.h">
+    <ClInclude Include="Platformer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DemoApp.h">
+    <ClInclude Include="Entity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="arne_sprites.png">
+    <Image Include="SpriteSheet.png">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="SpaceShooterSprites.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

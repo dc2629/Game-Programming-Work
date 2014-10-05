@@ -31,8 +31,9 @@ public:
 class SSEntity{
 private:
 	friend GLuint LoadTexture(const char* image_path);
+
+public:	
 	GLuint SStextureID;
-public:
 	void DrawSpriteSheetSprite();
 	float x;
 	float y;
