@@ -20,21 +20,15 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Entity.h">
+    <ClInclude Include="Entities.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Collision Detection.h">
+    <ClInclude Include="DemoApp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="fontspritesheet.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="SpaceShooterSprites.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="spacebackground.png">
+    <Image Include="arne_sprites.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
