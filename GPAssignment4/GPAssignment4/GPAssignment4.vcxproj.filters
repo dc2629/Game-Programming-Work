@@ -21,15 +21,9 @@
     <ClCompile Include="Platformer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Entity.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Platformer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Entity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -37,7 +31,7 @@
     <Image Include="SpriteSheet.png">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="SpaceShooterSprites.png">
+    <Image Include="fontspritesheet.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>
