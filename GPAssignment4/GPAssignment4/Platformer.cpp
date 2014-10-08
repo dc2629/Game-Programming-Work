@@ -239,7 +239,9 @@ void DemoApp::Init(){
 		tile.index = 16 + i % 4;
 		floor.push_back(tile);
 	}
-
+	tile.y = .4;
+	tile.x = -1;
+	floor.push_back(tile);
 	tile.index = 4;
 	tile.height = 0.1f;
 
@@ -374,6 +376,7 @@ void DemoApp::FixedUpdate(){
 			player.velocity_y = 0;
 			if (player.y > wall[i].y){
 				player.y += player.CalculateY_Pen(wall[i]);
+				player.collideBot = true;
 			}else
 				player.y -= player.CalculateY_Pen(wall[i]);
 
@@ -381,7 +384,7 @@ void DemoApp::FixedUpdate(){
 	}
 	for (int i = 0; i < enemies.size(); i++){
 		if (player.checkCollision(enemies[i])){
-			if (player.y>enemies[i].y){
+			if (player.y>enemies[i].y+.009f){
 				enemies[i].visible = false;
 			}
 		}
@@ -418,18 +421,19 @@ void DemoApp::FixedUpdate(){
 	}
 	const Uint8 *keys = SDL_GetKeyboardState(NULL);
 	if (keys[SDL_SCANCODE_RIGHT]){
-			player.acceleration_x += 0.01f*FIXED_TIMESTEP;
+			player.acceleration_x += 0.02f*FIXED_TIMESTEP;
 			player.flipX = true;
 	}
 	if (keys[SDL_SCANCODE_LEFT]){
-			player.acceleration_x -= 0.01f*FIXED_TIMESTEP;
+			player.acceleration_x -= 0.02f*FIXED_TIMESTEP;
 			player.flipX = false;
 
 	}
 	if (keys[SDL_SCANCODE_UP]){
 		if (player.collideBot)
-			player.velocity_y = .3f;
+			player.velocity_y = .4f;
 	}
+
 	player.resetCollisions();
 
 	player.velocity_y = lerp(player.velocity_y, 0.0f, FIXED_TIMESTEP*floor[0].friction_y);
