@@ -58,7 +58,7 @@ void Entity::Draw() {
 		if (flipX){
 			glScalef(-1, 1, 1);
 		}
-		
+
 		float u = (float)(((int)index) % spriteCountX) / (float)spriteCountX;
 		float v = (float)(((int)index) / spriteCountX) / (float)spriteCountY;
 		float spriteWidth = 1.0f / (float)spriteCountX;
@@ -113,13 +113,13 @@ float Entity::CalculateY_Pen(Entity A){
 	float Bot = y - height / 2;
 	float Right = x + width / 2;
 	float Left = x - width / 2;
-	
+
 	float y_distance = fabs(y - A.y);
 	float y_pen = fabs(y_distance - A.height / 2 - height / 2);
-	
+
 	return (y_pen);
 
-	
+
 }
 
 float Entity::CalculateX_Pen(Entity A){
@@ -135,9 +135,9 @@ float Entity::CalculateX_Pen(Entity A){
 
 	float x_distance = fabs(x - A.x);
 	float x_pen = fabs(x_distance - A.width / 2 - width / 2);
-	
-	return x_pen;
-	
+
+	return (x_pen);
+
 
 
 
@@ -185,7 +185,7 @@ void DemoApp::Init(){
 	timeLeftOver = 0.0f;
 
 	glMatrixMode(GL_MODELVIEW);
-	
+
 	genEnemy.textureID = SpriteSheetTextureID;
 	genEnemy.spriteCountX = 16;
 	genEnemy.spriteCountY = 8;
@@ -195,16 +195,16 @@ void DemoApp::Init(){
 	genEnemy.health = 3;
 	genEnemy.visible = true;
 	genEnemy.enableCollisions = true;
-	
+
 	for (int i = 0; i < MAX_ENEMIES; i++){
 		genEnemy.x = -0.5f + RANDOM_NUMBER;
-		if (RANDOM_NUMBER>.5)
+		if (RANDOM_NUMBER > .5)
 			genEnemy.velocity_x = 0.2;
 		else{
 			genEnemy.velocity_x = -0.2;
 			genEnemy.flipX = true;
 		}
-			
+
 		genEnemy.y = 0.9f;
 		enemies.push_back(genEnemy);
 	}
@@ -260,9 +260,9 @@ void DemoApp::Init(){
 	for (int i = 0; i < 20; i++){
 		if (i % 5 == 0){
 			tile.x = -0.75f + ((float)i / 10.0f);
-			floor.push_back(tile);
+			wall.push_back(tile);
 		}
-		
+
 	}
 
 }
@@ -286,7 +286,7 @@ void DemoApp::GameRender(){
 	for (int i = 0; i < MAX_ENEMIES; i++){
 		enemies[i].Draw();
 	}
-	
+
 
 }
 
@@ -321,19 +321,10 @@ void DemoApp::FixedUpdate(){
 				}
 			}
 		}
-		if (player.checkCollision(enemies[i])){
-			float x_pen = player.CalculateX_Pen(enemies[i]);
-			float y_pen = player.CalculateY_Pen(enemies[i]);
-			if (x_pen > y_pen){
-				cout << player.health << endl;
-				player.health--;
-			}
-			else{
-				enemies[i].visible = 0;
-			}
 
 
-		}
+
+
 
 	}
 
@@ -344,7 +335,7 @@ void DemoApp::FixedUpdate(){
 			enemies[i].flipX = true;
 		}
 		if (enemies[i].collideLeft){
-			enemies[i].velocity_x = .2f;			
+			enemies[i].velocity_x = .2f;
 			enemies[i].flipX = false;
 		}
 		if (enemies[i].collideTop){
@@ -356,26 +347,95 @@ void DemoApp::FixedUpdate(){
 		}
 
 	}
+
+
+
+
+
+	player.velocity_y += player.acceleration_y*FIXED_TIMESTEP;
+	player.velocity_y += gravity_y*FIXED_TIMESTEP;
+	player.y += player.velocity_y*FIXED_TIMESTEP;
 	for (int i = 0; i < floor.size(); i++){
 		if (player.checkCollision(floor[i])){
-			player.collideBot = true;
 			player.acceleration_y = 0;
-			player.y += player.CalculateY_Pen(floor[i]);
+			player.velocity_y = 0;
+			if (player.y > floor[i].y){
+				player.y += player.CalculateY_Pen(floor[i]);
+				player.collideBot = true;
+			}
+			else
+				player.y -= player.CalculateY_Pen(floor[i]);
 		}
 	}
 
-	for (int j = 0; j < wall.size(); j++){
-		if (player.checkCollision(wall[j])){
-			if (j < 10){
-				player.collideLeft = true;
-				player.x += player.CalculateX_Pen(wall[j]);
-			}
-			else{
-				player.collideRight = true;
-				player.x -= player.CalculateX_Pen(wall[j]);
+	for (int i = 0; i < wall.size(); i++){
+		if (player.checkCollision(wall[i])){
+			player.acceleration_y = 0;
+			player.velocity_y = 0;
+			if (player.y > wall[i].y){
+				player.y += player.CalculateY_Pen(wall[i]);
+			}else
+				player.y -= player.CalculateY_Pen(wall[i]);
+
+		}
+	}
+	for (int i = 0; i < enemies.size(); i++){
+		if (player.checkCollision(enemies[i])){
+			if (player.y>enemies[i].y){
+				enemies[i].visible = false;
 			}
 		}
 	}
+	player.velocity_x += player.acceleration_x*FIXED_TIMESTEP;
+	player.x += player.velocity_x*FIXED_TIMESTEP;
+
+	for (int i = 0; i < floor.size(); i++){
+		if (player.checkCollision(floor[i])){
+			player.acceleration_x = 0;
+			player.velocity_x = 0;
+			if (player.x>floor[i].x)
+				player.x += player.CalculateX_Pen(floor[i]);
+			else
+				player.x -= player.CalculateX_Pen(floor[i]);
+		}
+	}
+	for (int i = 0; i < wall.size(); i++){
+		if (player.checkCollision(wall[i])){
+			player.acceleration_x = 0;
+			player.velocity_x = 0;
+			if (player.x>wall[i].x)
+				player.x += player.CalculateX_Pen(wall[i]);
+			else
+				player.x -= player.CalculateX_Pen(wall[i]);
+
+		}
+	}
+	for (int i = 0; i < enemies.size(); i++){
+		if (player.checkCollision(enemies[i])){
+			if (enemies[i].visible)
+				State = STATE_GAME_OVER;
+		}
+	}
+	const Uint8 *keys = SDL_GetKeyboardState(NULL);
+	if (keys[SDL_SCANCODE_RIGHT]){
+			player.acceleration_x += 0.01f*FIXED_TIMESTEP;
+			player.flipX = true;
+	}
+	if (keys[SDL_SCANCODE_LEFT]){
+			player.acceleration_x -= 0.01f*FIXED_TIMESTEP;
+			player.flipX = false;
+
+	}
+	if (keys[SDL_SCANCODE_UP]){
+		if (player.collideBot)
+			player.velocity_y = .3f;
+	}
+	player.resetCollisions();
+
+	player.velocity_y = lerp(player.velocity_y, 0.0f, FIXED_TIMESTEP*floor[0].friction_y);
+	player.velocity_x = lerp(player.velocity_x, 0.0f, FIXED_TIMESTEP*floor[0].friction_x);
+	//player.acceleration_y = lerp(player.acceleration_y, 0.0f, FIXED_TIMESTEP*floor[0].friction_y);
+	//player.acceleration_x = lerp(player.acceleration_x, 0.0f, FIXED_TIMESTEP*floor[0].friction_x);
 
 }
 
@@ -388,45 +448,20 @@ void DemoApp::Update(float elapsed){
 		enemies[i].velocity_y += gravity_y*elapsed;
 		enemies[i].resetCollisions();
 	}
-	if (!player.collideBot){
-		player.velocity_y += gravity_y*elapsed;
-		player.y += player.velocity_y*elapsed;
-	}
-
-	const Uint8 *keys = SDL_GetKeyboardState(NULL);
-	if (keys[SDL_SCANCODE_RIGHT]){
-		if (!player.collideRight){
-			player.velocity_x += 0.02f;
-			player.acceleration_x += 0.01f*elapsed;
-			player.flipX = true;
-		}
-	}
-	if (keys[SDL_SCANCODE_LEFT]){
-		if (!player.collideLeft){
-			player.velocity_x -= 0.02f;
-			player.acceleration_x -= 0.01f*elapsed;
-			player.flipX = false;
-		}
-
-	}
-	if (keys[SDL_SCANCODE_UP]){
-		if (player.collideBot){
-			player.acceleration_y = 0;
-			player.velocity_y = .3f;
-			player.y += player.velocity_y*elapsed;
-		}
-	}
-	player.velocity_x += player.acceleration_x*elapsed;
-	player.x += player.velocity_x*elapsed;
-	player.velocity_y = lerp(player.velocity_y, 0.0f, elapsed*floor[0].friction_y);
-	player.velocity_x = lerp(player.velocity_x, 0.0f, elapsed*floor[0].friction_x);
-	
-	player.resetCollisions();
-
-	if (player.health == 0){
-		State = STATE_GAME_OVER;
-	}
 }
+//if (!player.collideBot){
+//	
+//}
+
+
+//player.velocity_x += player.acceleration_x*elapsed;
+//player.x += player.velocity_x*elapsed;
+
+//
+//player.resetCollisions();
+
+
+
 
 void DemoApp::UpdateandRender(){
 	float ticks = (float)SDL_GetTicks() / 1000.0f;
