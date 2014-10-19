@@ -1,8 +1,6 @@
 #include "Platformer.h"
 
 
-#include"Platformer.h"
-
 float lerp(float v0, float v1, float t) {
 	return (1.0f - t)*v0 + t*v1;
 }
@@ -55,7 +53,7 @@ void Entity::Draw() {
 		glEnable(GL_TEXTURE_2D);//enable or disable server-side GL capabilities, in this case enables 2d textures.
 		glBindTexture(GL_TEXTURE_2D, textureID);//binds texture to target. Binds an image to the texture map.
 		glMatrixMode(GL_MODELVIEW);//Modelview matrix determines location and angle of the sprites.
-		glLoadIdentity();//Resets all sprites.
+		glPushMatrix();
 		glTranslatef(x, y, 0.0);//move sprites across the window.
 		glRotatef(rotation, 0.0, 0.0, 1.0);//rotations on the z-view.
 		if (flipX){
@@ -82,6 +80,7 @@ void Entity::Draw() {
 		glDisable(GL_TEXTURE_2D);//Disable the texture since OpenGl won't use the same texture when redrawing other quads.
 		glDisable(GL_BLEND);
 		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+		glPopMatrix();
 	}
 }
 
@@ -146,7 +145,6 @@ float Entity::CalculateX_Pen(Entity A){
 
 }
 
-
 GLuint LoadTexture(const char* image_path) {
 	SDL_Surface *surface = IMG_Load(image_path);
 	GLuint textureID;
@@ -160,15 +158,23 @@ GLuint LoadTexture(const char* image_path) {
 	return textureID;
 }
 
-
-
-
-
-
 bool DemoApp::ProcessEvents(){
 	while (SDL_PollEvent(&EVENT)) {
 		if (EVENT.type == SDL_QUIT || EVENT.type == SDL_WINDOWEVENT_CLOSE) {
 			return(true);
+		}
+		else if (EVENT.type == SDL_MOUSEMOTION){
+			float unitX = (((float)EVENT.motion.x / 800.0f)*2.66f) - 1.33f;
+			float unitY = (((float)(600 - EVENT.motion.y) / 600.0f) * 2.0f) - 1.0f;
+			player.x = unitX;
+			player.y = unitY;
+		}
+		else if (EVENT.type == SDL_MOUSEBUTTONDOWN){
+			worldToTileCoordinates(player.x, player.y, player.gridX, player.gridY);
+			cout << "This is x value: " << player.x << " and y value: " << player.y << endl;
+			cout << "This is the grid_X value: " << player.gridX << "and the grid_Y value: " << player.gridY << endl;
+			TileCollisonX(player);
+			TileCollisonY(player);
 		}
 
 	}
@@ -190,6 +196,7 @@ void DemoApp::Init(){
 	lastFrameTicks = 0.0f;
 	gravity_y = -0.1f;
 	timeLeftOver = 0.0f;
+	TILE_SIZE = 0.06f;
 
 	glMatrixMode(GL_MODELVIEW);
 	SpriteSheetTextureID = LoadTexture("SpriteSheet.png");
@@ -208,18 +215,18 @@ void DemoApp::Init(){
 		}
 
 	}
-	//player.textureID = SpriteSheetTextureID;
-	//player.spriteCountX = 16;
-	//player.spriteCountY = 8;
-	//player.index = 6;
-	//player.visible = true;
-	//player.enableCollisions = true;
-	//player.health = 3;
-	//player.height = 0.1f;
-	//player.width = 0.1f;
-	//player.x = -1.0f;
-	//player.y = 0.6f;
 
+	player.textureID = SpriteSheetTextureID;
+	player.spriteCountX = 16;
+	player.spriteCountY = 8;
+	player.index = 6;
+	player.visible = true;
+	player.enableCollisions = true;
+	player.health = 3;
+	player.height = 0.1f;
+	player.width = 0.1f;
+	player.x = 0.0f;
+	player.y = 0.0f;
 
 
 }
@@ -267,47 +274,33 @@ bool DemoApp::readLayerData(ifstream &stream) {
 				getline(stream, line);
 				istringstream lineStream(line);
 				string tile;
-
 				for (int x = 0; x < mapWidth; x++) {
 					getline(lineStream, tile, ',');
-					
 					unsigned char val = (unsigned char)atoi(tile.c_str());
-
 					if (val > 0) {
 						// be careful, the tiles in this format are indexed from 1 not 0
 						levelData[y][x] = val - 1;
-						cout << "This is y and x: "<<y<<"and "<<x<<" and this is levelData value: "<<levelData[y][x] << endl;
 					}
 					else {
 						levelData[y][x] = 0;
 					}
 				}
-
 			}
 		}
 	}
 	return true;
 }
 
-
-
 void DemoApp::buildLevel() {
 
 	int SPRITE_COUNT_X = 16;
 	int SPRITE_COUNT_Y = 8;
-	float TILE_SIZE = 0.1f;
 
-	glEnable(GL_TEXTURE_2D);
-	glBindTexture(GL_TEXTURE_2D, SpriteSheetTextureID);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();//Resets all sprites.
-
-	float texture_size = 1.0 / 16.0f;
 	vector<float> vertexData;
 	vector<float> texCoordData;
 
-	for (int y = 0; y < LEVEL_HEIGHT; y++) {
-		for (int x = 0; x < LEVEL_WIDTH; x++) {
+	for (int y = 0; y < mapHeight; y++) {
+		for (int x = 0; x < mapWidth; x++) {
 			if (levelData[y][x] != 0) {
 				
 				float u = (float)(((int)levelData[y][x]) % SPRITE_COUNT_X) / (float)SPRITE_COUNT_X;
@@ -320,27 +313,18 @@ void DemoApp::buildLevel() {
 					(TILE_SIZE * x) + TILE_SIZE, (-TILE_SIZE * y) - TILE_SIZE,
 					(TILE_SIZE * x) + TILE_SIZE, -TILE_SIZE * y
 				});
-				texCoordData.insert(texCoordData.end(), { u, v,
-					u, v + (spriteHeight),
-					u + spriteWidth, v + (spriteHeight),
-					u + spriteWidth, v
+				texCoordData.insert(texCoordData.end(), { u +0.002f, v,
+					u + 0.002f, v + (spriteHeight),
+					u + spriteWidth -0.002f, v + (spriteHeight),
+					u + spriteWidth -0.002f, v
 				});
 
 
 			}
 		}
 	}
-	glVertexPointer(2, GL_FLOAT, 0, vertexData.data());
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glTexCoordPointer(2, GL_FLOAT, 0, texCoordData.data());
-	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDrawArrays(GL_QUADS, 0, 4);
-	glDisable(GL_TEXTURE_2D);
-	glDisable(GL_BLEND);
-	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-
+	levelvertexData = vertexData;
+	leveltexCoordData = texCoordData;
 }
 
 DemoApp::DemoApp(){
@@ -352,20 +336,36 @@ DemoApp::~DemoApp(){
 }
 
 void DemoApp::GameRender(){
-	//player.Draw();
+	player.Draw();
+	buildLevel();
+	glMatrixMode(GL_MODELVIEW);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, SpriteSheetTextureID);
+	glPushMatrix();
+	glTranslatef(-TILE_SIZE * mapWidth / 2, TILE_SIZE * mapHeight / 2, 0.0f);
 
+	glVertexPointer(2, GL_FLOAT, 0, levelvertexData.data());
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glTexCoordPointer(2, GL_FLOAT, 0, leveltexCoordData.data());
+	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDrawArrays(GL_QUADS, 0, levelvertexData.size() / 2);
+	glDisable(GL_TEXTURE_2D);
+	glDisable(GL_BLEND);
+	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+
+	glPopMatrix();
 
 }
 
 void DemoApp::Render(){
-
+	glClearColor(0.7f, 0.5f, 0.9f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	if (State == STATE_GAME_LEVEL){
 		GameRender();
-	}
-
-
+	}	
 
 	SDL_GL_SwapWindow(displayWindow);
 }
@@ -390,12 +390,6 @@ void DemoApp::FixedUpdate(){
 	//	}
 
 
-
-
-
-	//}
-
-
 	//for (int i = 0; i < MAX_ENEMIES; i++){
 	//	if (enemies[i].collideRight){
 	//		enemies[i].velocity_x = -.2f;
@@ -413,100 +407,50 @@ void DemoApp::FixedUpdate(){
 	//		enemies[i].acceleration_y = 0;
 	//	}
 
-	//}
+	
 
 
 
 
 
-	//player.velocity_y += player.acceleration_y*FIXED_TIMESTEP;
+	player.velocity_y += player.acceleration_y*FIXED_TIMESTEP;
 	//player.velocity_y += gravity_y*FIXED_TIMESTEP;
-	//player.y += player.velocity_y*FIXED_TIMESTEP;
-	//for (int i = 0; i < floor.size(); i++){
-	//	if (player.checkCollision(floor[i])){
-	//		player.acceleration_y = 0;
-	//		player.velocity_y = 0;
-	//		if (player.y > floor[i].y){
-	//			player.y += player.CalculateY_Pen(floor[i]);
-	//			player.collideBot = true;
-	//		}
-	//		else
-	//			player.y -= player.CalculateY_Pen(floor[i]);
-	//	}
-	//}
+	player.y += player.velocity_y*FIXED_TIMESTEP;
 
-	//for (int i = 0; i < wall.size(); i++){
-	//	if (player.checkCollision(wall[i])){
-	//		player.acceleration_y = 0;
-	//		player.velocity_y = 0;
-	//		if (player.y > wall[i].y){
-	//			player.y += player.CalculateY_Pen(wall[i]);
-	//			player.collideBot = true;
-	//		}
-	//		else
-	//			player.y -= player.CalculateY_Pen(wall[i]);
+	
 
-	//	}
-	//}
+	player.velocity_x += player.acceleration_x*FIXED_TIMESTEP;
+	player.x += player.velocity_x*FIXED_TIMESTEP;
+
+
 	//for (int i = 0; i < enemies.size(); i++){
 	//	if (player.checkCollision(enemies[i])){
-	//		if (player.y>enemies[i].y + .009f){
-	//			enemies[i].visible = false;
-	//		}
+	//		if (enemies[i].visible)
+	//			State = STATE_GAME_OVER;
 	//	}
 	//}
-	//player.velocity_x += player.acceleration_x*FIXED_TIMESTEP;
-	//player.x += player.velocity_x*FIXED_TIMESTEP;
 
-	//for (int i = 0; i < floor.size(); i++){
-	//	if (player.checkCollision(floor[i])){
-	//		player.acceleration_x = 0;
-	//		player.velocity_x = 0;
-	//		if (player.x>floor[i].x)
-	//			player.x += player.CalculateX_Pen(floor[i]);
-	//		else
-	//			player.x -= player.CalculateX_Pen(floor[i]);
-	//	}
-	//}
-	//for (int i = 0; i < wall.size(); i++){
-	//	if (player.checkCollision(wall[i])){
-	//		player.acceleration_x = 0;
-	//		player.velocity_x = 0;
-	//		if (player.x>wall[i].x)
-	//			player.x += player.CalculateX_Pen(wall[i]);
-	//		else
-	//			player.x -= player.CalculateX_Pen(wall[i]);
+	player.acceleration_x = 0.0f;
 
-	//	}
-	//}
-	////for (int i = 0; i < enemies.size(); i++){
-	////	if (player.checkCollision(enemies[i])){
-	////		if (enemies[i].visible)
-	////			State = STATE_GAME_OVER;
-	////	}
-	////}
+	const Uint8 *keys = SDL_GetKeyboardState(NULL);
+	if (keys[SDL_SCANCODE_RIGHT]){
+		player.acceleration_x = 0.2f;
+		player.flipX = true;
+	}
+	if (keys[SDL_SCANCODE_LEFT]){
+		player.acceleration_x = -0.2f;
+		player.flipX = false;
 
-	//player.acceleration_x = 0.0f;
+	}
+	if (keys[SDL_SCANCODE_UP]){
+		if (player.collideBot)
+			player.velocity_y = .4f;
+	}
 
-	//const Uint8 *keys = SDL_GetKeyboardState(NULL);
-	//if (keys[SDL_SCANCODE_RIGHT]){
-	//	player.acceleration_x = 0.2f;
-	//	player.flipX = true;
-	//}
-	//if (keys[SDL_SCANCODE_LEFT]){
-	//	player.acceleration_x = -0.2f;
-	//	player.flipX = false;
+	player.resetCollisions();
 
-	//}
-	//if (keys[SDL_SCANCODE_UP]){
-	//	if (player.collideBot)
-	//		player.velocity_y = .4f;
-	//}
-
-	//player.resetCollisions();
-
-	//player.velocity_y = lerp(player.velocity_y, 0.0f, FIXED_TIMESTEP*floor[0].friction_y);
-	//player.velocity_x = lerp(player.velocity_x, 0.0f, FIXED_TIMESTEP*floor[0].friction_x);
+	player.velocity_y = lerp(player.velocity_y, 0.0f, FIXED_TIMESTEP*0.5f);
+	player.velocity_x = lerp(player.velocity_x, 0.0f, FIXED_TIMESTEP*0.5f);
 
 
 }
@@ -514,8 +458,6 @@ void DemoApp::FixedUpdate(){
 void DemoApp::Update(float elapsed){
 
 }
-
-
 
 void DemoApp::UpdateandRender(){
 	float ticks = (float)SDL_GetTicks() / 1000.0f;
@@ -533,3 +475,68 @@ void DemoApp::UpdateandRender(){
 	Update(elapsed);
 	Render();
 }
+
+void DemoApp::worldToTileCoordinates(float X, float Y, int& gridX, int& gridY) {
+	gridX = (int)((X + (TILE_SIZE * mapWidth / 2)) / TILE_SIZE);
+	gridY = -(int)((Y - (TILE_SIZE * mapHeight / 2) )/ TILE_SIZE);
+	return;
+}
+
+bool DemoApp::TileCollisonX(Entity &entity){
+	float widthhalf = entity.width/2;
+	float heighthalf = entity.height/2;
+	float left = entity.x - widthhalf;
+	float right = entity.x + widthhalf;
+	worldToTileCoordinates(entity.x, entity.y, entity.gridX, entity.gridY);
+	if (entity.gridY < mapHeight&&entity.gridX < mapWidth){
+		worldToTileCoordinates(left, entity.y, entity.gridX, entity.gridY);
+		if (levelData[entity.gridY][entity.gridX] != 0){
+			//entity.x += entity.gridX*TILE_SIZE + 0.01f;
+			cout << "Is colliding on the left" << endl;
+			entity.collideLeft = true;
+			return true;
+		}
+		worldToTileCoordinates(right, entity.y, entity.gridX, entity.gridY);
+		if (levelData[entity.gridY][entity.gridX] != 0){
+			//entity.x -= entity.gridX*TILE_SIZE + 0.01f;
+			cout << "Is colliding on the right" << endl;
+			entity.collideRight = true;
+			return true;
+		}
+	}
+
+	
+	return false;
+}
+
+bool DemoApp::TileCollisonY(Entity &entity){
+	worldToTileCoordinates(entity.x, entity.y, entity.gridX, entity.gridY);
+	float widthhalf = entity.width/2;
+	float heighthalf = entity.height/2;
+	float bot = entity.y - heighthalf;
+	float top = entity.y + heighthalf;
+	worldToTileCoordinates(entity.x, entity.y, entity.gridX, entity.gridY);
+	if (entity.gridY < mapHeight&&entity.gridX < mapWidth){
+		worldToTileCoordinates(entity.x, bot, entity.gridX, entity.gridY);
+		if (levelData[entity.gridY][entity.gridX] != 0){
+			//entity.y = 0;
+			//entity.velocity_y = 0.0f;
+			cout << "Is colliding on the bot" << endl;
+			entity.collideBot = true;
+			return true;
+		}
+
+		worldToTileCoordinates(entity.x, top, entity.gridX, entity.gridY);
+		if (levelData[entity.gridY][entity.gridX] != 0){
+			//entity.y = 0;
+			//entity.velocity_y = 0.0f;
+			cout << "Is colliding on the top" << endl;
+			entity.collideTop = true;
+			return true;
+		}
+	}
+
+
+	return false;
+}
+

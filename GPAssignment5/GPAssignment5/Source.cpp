@@ -7,7 +7,6 @@ int main(int argc, char *argv[]){
 
 	DemoApp App;
 	while (!App.ProcessEvents()){
-		App.buildLevel();
 		App.UpdateandRender();
 
 	}

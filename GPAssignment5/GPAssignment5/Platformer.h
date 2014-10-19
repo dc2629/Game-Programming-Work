@@ -19,8 +19,6 @@
 
 #define RANDOM_NUMBER ((float)rand()/(float)RAND_MAX)
 
-#define LEVEL_HEIGHT 16
-#define LEVEL_WIDTH 22
 
 
 using namespace std;
@@ -33,6 +31,8 @@ public:
 
 	float x;
 	float y;
+	int gridX;
+	int gridY;
 	float rotation;
 
 	GLint textureID;
@@ -118,6 +118,7 @@ public:
 	float timeLeftOver = 0.0f;
 	float gravity_y = -1.0f;
 
+	Entity player;
 
 	enum GameState { STATE_MAIN_MENU, STATE_GAME_LEVEL, STATE_GAME_OVER };
 	int State;
@@ -130,5 +131,15 @@ public:
 	bool readLayerData(std::ifstream &stream);
 	int mapWidth;
 	int mapHeight;
+	vector<float> levelvertexData;
+	vector<float> leveltexCoordData;
+	float TILE_SIZE;
+
+	void worldToTileCoordinates(float X, float Y, int& gridX, int& gridY);
+	float tiletoWorldCoordinatesx(int gridX);
+	float tiletoWorldCoordinatesy(int gridY);
+	bool TileCollisonX(Entity &entity);
+	bool TileCollisonY(Entity &entity);
+
 
 };
