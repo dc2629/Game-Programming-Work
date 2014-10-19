@@ -192,8 +192,22 @@ void DemoApp::Init(){
 	timeLeftOver = 0.0f;
 
 	glMatrixMode(GL_MODELVIEW);
+	SpriteSheetTextureID = LoadTexture("SpriteSheet.png");
+	mapWidth = -1;
+	mapHeight = -1;
+	ifstream infile("myfirstmap.txt");
+	string line;
+	while (getline(infile, line)) {
+		if (line == "[header]") {
+			if (!readHeader(infile)) {
+				return;
+			}
+		}
+		else if (line == "[layer]") {
+			readLayerData(infile);
+		}
 
-
+	}
 	//player.textureID = SpriteSheetTextureID;
 	//player.spriteCountX = 16;
 	//player.spriteCountY = 8;
@@ -206,43 +220,41 @@ void DemoApp::Init(){
 	//player.x = -1.0f;
 	//player.y = 0.6f;
 
-	
+
 
 }
 
-bool DemoApp::readHeader(std::ifstream &stream) {
+bool DemoApp::readHeader(ifstream &stream) {
 	string line;
-	mapWidth = -1;
-	mapHeight = -1;
 	while (getline(stream, line)) {
 		if (line == "") { break; }
-		
-			istringstream sStream(line);
+
+		istringstream sStream(line);
 		string key, value;
 		getline(sStream, key, '=');
 		getline(sStream, value);
-		
-			if (key == "width") {
+
+		if (key == "width") {
 			mapWidth = atoi(value.c_str());
-			}
-			else if (key == "height"){
-				mapHeight = atoi(value.c_str());
-			}
+		}
+		else if (key == "height"){
+			mapHeight = atoi(value.c_str());
+		}
 	}
-	
-		if (mapWidth == -1 || mapHeight == -1) {
+
+	if (mapWidth == -1 || mapHeight == -1) {
 		return false;
+	}
+	else { // allocate our map data
+		levelData = new unsigned char*[mapHeight];
+		for (int i = 0; i < mapHeight; ++i) {
+			levelData[i] = new unsigned char[mapWidth];
 		}
-		else { // allocate our map data
-			levelData = new unsigned char*[mapHeight];
-			for (int i = 0; i < mapHeight; ++i) {
-				levelData[i] = new unsigned char[mapWidth];
-			}
-			return true;
-		}
+		return true;
+	}
 }
 
-bool DemoApp::readLayerData(std::ifstream &stream) {
+bool DemoApp::readLayerData(ifstream &stream) {
 	string line;
 	while (getline(stream, line)) {
 		if (line == "") { break; }
@@ -255,19 +267,22 @@ bool DemoApp::readLayerData(std::ifstream &stream) {
 				getline(stream, line);
 				istringstream lineStream(line);
 				string tile;
-				
-					for (int x = 0; x < mapWidth; x++) {
+
+				for (int x = 0; x < mapWidth; x++) {
 					getline(lineStream, tile, ',');
+					
 					unsigned char val = (unsigned char)atoi(tile.c_str());
+
 					if (val > 0) {
 						// be careful, the tiles in this format are indexed from 1 not 0
 						levelData[y][x] = val - 1;
+						cout << "This is y and x: "<<y<<"and "<<x<<" and this is levelData value: "<<levelData[y][x] << endl;
 					}
 					else {
 						levelData[y][x] = 0;
 					}
-					}
-				
+				}
+
 			}
 		}
 	}
@@ -277,21 +292,7 @@ bool DemoApp::readLayerData(std::ifstream &stream) {
 
 
 void DemoApp::buildLevel() {
-	ifstream infile("myfirstmap.txt");
-	string line;
-	while (getline(infile, line)) {
-		if (line == "[header]") {
-			if (!readHeader(infile)) {
-				return;
-			}
-		}
-		else if (line == "[layer]") {
-			readLayerData(	infile);
-		}
 
-	}
-
-	SpriteSheetTextureID = LoadTexture("SpriteSheet.png");
 	int SPRITE_COUNT_X = 16;
 	int SPRITE_COUNT_Y = 8;
 	float TILE_SIZE = 0.1f;
@@ -307,9 +308,8 @@ void DemoApp::buildLevel() {
 
 	for (int y = 0; y < LEVEL_HEIGHT; y++) {
 		for (int x = 0; x < LEVEL_WIDTH; x++) {
-
 			if (levelData[y][x] != 0) {
-
+				
 				float u = (float)(((int)levelData[y][x]) % SPRITE_COUNT_X) / (float)SPRITE_COUNT_X;
 				float v = (float)(((int)levelData[y][x]) / SPRITE_COUNT_X) / (float)SPRITE_COUNT_Y;
 				float spriteWidth = 1.0f / (float)SPRITE_COUNT_X;
