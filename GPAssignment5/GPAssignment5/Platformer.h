@@ -2,11 +2,13 @@
 #include<SDL.h>
 #include<SDL_image.h>
 #include<SDL_opengl.h>
-#include<iostream>
-#include<string>
 #include<stdio.h>
 #include<vector>
 #include<algorithm>
+#include <fstream>
+#include <string>
+#include <iostream>
+#include <sstream>
 
 #define MAX_ENEMIES 8
 #define MAX_BULLETS 15
@@ -120,11 +122,13 @@ public:
 	enum GameState { STATE_MAIN_MENU, STATE_GAME_LEVEL, STATE_GAME_OVER };
 	int State;
 
-	unsigned char levelData[LEVEL_HEIGHT][LEVEL_WIDTH];
+	unsigned char** levelData;
 	//unsigned char level1Data[LEVEL_HEIGHT][LEVEL_WIDTH];
 
 	void buildLevel();
-
-
+	bool readHeader(std::ifstream &stream);
+	bool readLayerData(std::ifstream &stream);
+	int mapWidth;
+	int mapHeight;
 
 };

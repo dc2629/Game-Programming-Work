@@ -90,6 +90,9 @@
     <Image Include="fontspritesheet.png" />
     <Image Include="SpriteSheet.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="myfirstmap.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

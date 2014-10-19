@@ -187,7 +187,6 @@ void DemoApp::Init(){
 	glMatrixMode(GL_PROJECTION);//Usually ran once and thats it.
 	glOrtho(-1.33, 1.33, -1, 1, -1, 1);//The ratio of resolutions
 
-	SpriteSheetTextureID = LoadTexture("SpriteSheet.png");
 	lastFrameTicks = 0.0f;
 	gravity_y = -0.1f;
 	timeLeftOver = 0.0f;
@@ -211,82 +210,136 @@ void DemoApp::Init(){
 
 }
 
-void DemoApp::buildLevel() {
-	unsigned char level1Data[LEVEL_HEIGHT][LEVEL_WIDTH] =
-	{
-		{ 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11 },
-		{ 0, 20, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 20, 0 },
-		{ 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0 },
-		{ 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0 },
-		{ 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0 },
-		{ 0, 20, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 20, 0 },
-		{ 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0 },
-		{ 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0 },
-		{ 0, 20, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 20, 0 },
-		{ 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0 },
-		{ 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0 },
-		{ 0, 20, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 20, 0 },
-		{ 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0 },
-		{ 0, 20, 125, 118, 0, 0, 116, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 117, 0, 127, 20, 0 },
-		{ 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 0, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2 },
-		{ 32, 33, 33, 34, 32, 33, 33, 34, 33, 35, 100, 101, 35, 32, 33, 32, 34, 32, 33, 32, 33, 33 }
-	};
+bool DemoApp::readHeader(std::ifstream &stream) {
+	string line;
+	mapWidth = -1;
+	mapHeight = -1;
+	while (getline(stream, line)) {
+		if (line == "") { break; }
+		
+			istringstream sStream(line);
+		string key, value;
+		getline(sStream, key, '=');
+		getline(sStream, value);
+		
+			if (key == "width") {
+			mapWidth = atoi(value.c_str());
+			}
+			else if (key == "height"){
+				mapHeight = atoi(value.c_str());
+			}
+	}
+	
+		if (mapWidth == -1 || mapHeight == -1) {
+		return false;
+		}
+		else { // allocate our map data
+			levelData = new unsigned char*[mapHeight];
+			for (int i = 0; i < mapHeight; ++i) {
+				levelData[i] = new unsigned char[mapWidth];
+			}
+			return true;
+		}
+}
 
-	int SPRITE_COUNT_X =16;
+bool DemoApp::readLayerData(std::ifstream &stream) {
+	string line;
+	while (getline(stream, line)) {
+		if (line == "") { break; }
+		istringstream sStream(line);
+		string key, value;
+		getline(sStream, key, '=');
+		getline(sStream, value);
+		if (key == "data") {
+			for (int y = 0; y < mapHeight; y++) {
+				getline(stream, line);
+				istringstream lineStream(line);
+				string tile;
+				
+					for (int x = 0; x < mapWidth; x++) {
+					getline(lineStream, tile, ',');
+					unsigned char val = (unsigned char)atoi(tile.c_str());
+					if (val > 0) {
+						// be careful, the tiles in this format are indexed from 1 not 0
+						levelData[y][x] = val - 1;
+					}
+					else {
+						levelData[y][x] = 0;
+					}
+					}
+				
+			}
+		}
+	}
+	return true;
+}
+
+
+
+void DemoApp::buildLevel() {
+	ifstream infile("myfirstmap.txt");
+	string line;
+	while (getline(infile, line)) {
+		if (line == "[header]") {
+			if (!readHeader(infile)) {
+				return;
+			}
+		}
+		else if (line == "[layer]") {
+			readLayerData(	infile);
+		}
+
+	}
+
+	SpriteSheetTextureID = LoadTexture("SpriteSheet.png");
+	int SPRITE_COUNT_X = 16;
 	int SPRITE_COUNT_Y = 8;
 	float TILE_SIZE = 0.1f;
-
-
-	memcpy(levelData, level1Data, LEVEL_HEIGHT*LEVEL_WIDTH);
 
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, SpriteSheetTextureID);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();//Resets all sprites.
 
-
+	float texture_size = 1.0 / 16.0f;
 	vector<float> vertexData;
 	vector<float> texCoordData;
 
 	for (int y = 0; y < LEVEL_HEIGHT; y++) {
 		for (int x = 0; x < LEVEL_WIDTH; x++) {
-			
-				if (levelData[y][x] != 0) {
-				
-					float u = (float)(((int)levelData[y][x]) % SPRITE_COUNT_X) / (float)SPRITE_COUNT_X;
-					float v = (float)(((int)levelData[y][x]) / SPRITE_COUNT_X) / (float)SPRITE_COUNT_Y;
-					float spriteWidth = 1.0f / (float)SPRITE_COUNT_X;
-					float spriteHeight = 1.0f / (float)SPRITE_COUNT_Y;
-					vertexData.insert(vertexData.end(), {
-						TILE_SIZE * x, -TILE_SIZE * y,
-						TILE_SIZE * x, (-TILE_SIZE * y) - TILE_SIZE,
-						(TILE_SIZE * x) + TILE_SIZE, (-TILE_SIZE * y) - TILE_SIZE,
-						(TILE_SIZE * x) + TILE_SIZE, -TILE_SIZE * y
-					});
-					texCoordData.insert(texCoordData.end(), { u, v,
-						u, v + (spriteHeight),
-						u + spriteWidth, v + (spriteHeight),
-						u + spriteWidth, v
-					});
+
+			if (levelData[y][x] != 0) {
+
+				float u = (float)(((int)levelData[y][x]) % SPRITE_COUNT_X) / (float)SPRITE_COUNT_X;
+				float v = (float)(((int)levelData[y][x]) / SPRITE_COUNT_X) / (float)SPRITE_COUNT_Y;
+				float spriteWidth = 1.0f / (float)SPRITE_COUNT_X;
+				float spriteHeight = 1.0f / (float)SPRITE_COUNT_Y;
+				vertexData.insert(vertexData.end(), {
+					TILE_SIZE * x, -TILE_SIZE * y,
+					TILE_SIZE * x, (-TILE_SIZE * y) - TILE_SIZE,
+					(TILE_SIZE * x) + TILE_SIZE, (-TILE_SIZE * y) - TILE_SIZE,
+					(TILE_SIZE * x) + TILE_SIZE, -TILE_SIZE * y
+				});
+				texCoordData.insert(texCoordData.end(), { u, v,
+					u, v + (spriteHeight),
+					u + spriteWidth, v + (spriteHeight),
+					u + spriteWidth, v
+				});
 
 
-				}
+			}
 		}
 	}
-
-
-	glEnableClientState(GL_COLOR_ARRAY);
 	glVertexPointer(2, GL_FLOAT, 0, vertexData.data());
 	glEnableClientState(GL_VERTEX_ARRAY);
 	glTexCoordPointer(2, GL_FLOAT, 0, texCoordData.data());
 	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDrawArrays(GL_QUADS, 0, vertexData.size());
+	glDrawArrays(GL_QUADS, 0, 4);
 	glDisable(GL_TEXTURE_2D);
 	glDisable(GL_BLEND);
 	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	glDisableClientState(GL_COLOR_ARRAY);
 
 }
 
@@ -300,15 +353,6 @@ DemoApp::~DemoApp(){
 
 void DemoApp::GameRender(){
 	//player.Draw();
-	//for (int i = 0; i < floor.size(); i++){
-	//	floor[i].Draw();
-	//}
-	//for (int i = 0; i < wall.size(); i++){
-	//	wall[i].Draw();
-	//}
-	//for (int i = 0; i < MAX_ENEMIES; i++){
-	//	enemies[i].Draw();
-	//}
 
 
 }
