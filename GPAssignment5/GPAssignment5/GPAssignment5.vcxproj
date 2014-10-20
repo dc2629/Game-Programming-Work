@@ -57,7 +57,7 @@
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -92,6 +92,11 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="myfirstmap.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="jump.wav" />
+    <Media Include="raygun.wav" />
+    <Media Include="vivy.mp3" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

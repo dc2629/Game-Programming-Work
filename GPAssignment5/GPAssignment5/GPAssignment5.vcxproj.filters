@@ -40,4 +40,15 @@
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>
+  <ItemGroup>
+    <Media Include="vivy.mp3">
+      <Filter>Resource Files</Filter>
+    </Media>
+    <Media Include="jump.wav">
+      <Filter>Resource Files</Filter>
+    </Media>
+    <Media Include="raygun.wav">
+      <Filter>Resource Files</Filter>
+    </Media>
+  </ItemGroup>
 </Project>

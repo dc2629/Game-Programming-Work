@@ -9,6 +9,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include<SDL_mixer.h>
 
 #define MAX_ENEMIES 8
 #define MAX_BULLETS 15
@@ -89,6 +90,7 @@ public:
 	float y;
 };
 
+
 class DemoApp{
 public:
 	DemoApp();
@@ -119,6 +121,7 @@ public:
 	float gravity_y = -1.0f;
 
 	Entity player;
+	Entity bullet;
 
 	enum GameState { STATE_MAIN_MENU, STATE_GAME_LEVEL, STATE_GAME_OVER };
 	int State;
@@ -140,5 +143,7 @@ public:
 	float tiletoWorldCoordinatesy(int gridY);
 	bool TileCollisonX(Entity &entity);
 	bool TileCollisonY(Entity &entity);
-
+	Mix_Music *music;
+	Mix_Chunk *gunsblazing;
+	Mix_Chunk *mariojump;
 };

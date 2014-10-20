@@ -177,7 +177,17 @@ bool DemoApp::ProcessEvents(){
 		//	TileCollisonY(player);
 		//	TileCollisonX(player);
 		//}
-
+		else if (EVENT.type == SDL_KEYDOWN){
+			if (EVENT.key.keysym.scancode == SDL_SCANCODE_SPACE){
+				if (bullet.visible == false){
+					bullet.x = player.x;
+					bullet.y = player.y;
+					bullet.flipX = player.flipX;
+					bullet.visible = true;
+					Mix_PlayChannel(-1, gunsblazing, 0);
+				}
+			}
+		}
 	}
 	return false;
 }
@@ -193,6 +203,16 @@ void DemoApp::Init(){
 	glViewport(0, 0, 800, 600);//The start of using OpenGL with the arguments as the resolution.
 	glMatrixMode(GL_PROJECTION);//Usually ran once and thats it.
 	glOrtho(-1.33, 1.33, -1, 1, -1, 1);//The ratio of resolutions
+
+	//Initialize music
+	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
+
+	music = Mix_LoadMUS("vivy.mp3");
+	Mix_PlayMusic(music, -1);
+	gunsblazing = Mix_LoadWAV("raygun.wav");
+	mariojump = Mix_LoadWAV("jump.wav");
+
+
 
 	lastFrameTicks = 0.0f;
 	gravity_y = -0.1f;
@@ -229,7 +249,14 @@ void DemoApp::Init(){
 	player.x = 0.0f;
 	player.y = 0.0f;
 
-
+	bullet.textureID = SpriteSheetTextureID;
+	bullet.height = .15f;
+	bullet.width = .5f;
+	bullet.spriteCountX = 16;
+	bullet.spriteCountY = 8;
+	bullet.index = 24;
+	bullet.velocity_x = 1.0f;
+	bullet.visible = false;
 }
 
 bool DemoApp::readHeader(ifstream &stream) {
@@ -303,7 +330,7 @@ void DemoApp::buildLevel() {
 	for (int y = 0; y < mapHeight; y++) {
 		for (int x = 0; x < mapWidth; x++) {
 			if (levelData[y][x] != 0) {
-				
+
 				float u = (float)(((int)levelData[y][x]) % SPRITE_COUNT_X) / (float)SPRITE_COUNT_X;
 				float v = (float)(((int)levelData[y][x]) / SPRITE_COUNT_X) / (float)SPRITE_COUNT_Y;
 				float spriteWidth = 1.0f / (float)SPRITE_COUNT_X;
@@ -314,10 +341,10 @@ void DemoApp::buildLevel() {
 					(TILE_SIZE * x) + TILE_SIZE, (-TILE_SIZE * y) - TILE_SIZE,
 					(TILE_SIZE * x) + TILE_SIZE, -TILE_SIZE * y
 				});
-				texCoordData.insert(texCoordData.end(), { u +0.002f, v,
+				texCoordData.insert(texCoordData.end(), { u + 0.002f, v,
 					u + 0.002f, v + (spriteHeight),
-					u + spriteWidth -0.002f, v + (spriteHeight),
-					u + spriteWidth -0.002f, v
+					u + spriteWidth - 0.002f, v + (spriteHeight),
+					u + spriteWidth - 0.002f, v
 				});
 
 
@@ -333,11 +360,13 @@ DemoApp::DemoApp(){
 }
 
 DemoApp::~DemoApp(){
+	Mix_FreeMusic(music);
 	SDL_Quit();
 }
 
 void DemoApp::GameRender(){
 	player.Draw();
+	bullet.Draw();
 	buildLevel();
 	glMatrixMode(GL_MODELVIEW);
 	glEnable(GL_TEXTURE_2D);
@@ -367,6 +396,7 @@ void DemoApp::Render(){
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	if (State == STATE_GAME_LEVEL){
+
 		glPushMatrix();
 		glMatrixMode(GL_MODELVIEW);
 		float translateX = -player.x;
@@ -381,10 +411,10 @@ void DemoApp::Render(){
 		}
 
 		glTranslatef(translateX, translateY, 0.0f);
-	
+
 		GameRender();
 		glPopMatrix();
-	}	
+	}
 
 	SDL_GL_SwapWindow(displayWindow);
 }
@@ -426,7 +456,7 @@ void DemoApp::FixedUpdate(){
 	//		enemies[i].acceleration_y = 0;
 	//	}
 
-	
+
 
 
 
@@ -436,11 +466,17 @@ void DemoApp::FixedUpdate(){
 	player.velocity_y += gravity_y*FIXED_TIMESTEP;
 	player.y += player.velocity_y*FIXED_TIMESTEP;
 	TileCollisonY(player);
-	
+
 
 	player.velocity_x += player.acceleration_x*FIXED_TIMESTEP;
 	player.x += player.velocity_x*FIXED_TIMESTEP;
 	TileCollisonX(player);
+	if (bullet.flipX)
+		bullet.x += .04;
+	else
+		bullet.x -= .04;
+
+
 
 	//for (int i = 0; i < enemies.size(); i++){
 	//	if (player.checkCollision(enemies[i])){
@@ -462,8 +498,10 @@ void DemoApp::FixedUpdate(){
 
 	}
 	if (keys[SDL_SCANCODE_UP]){
-		if (player.collideBot)
-			player.velocity_y = .4f;
+		if (player.collideBot){
+			player.velocity_y = .3f;
+			Mix_PlayChannel(-1, mariojump, 0);
+		}
 	}
 
 	player.resetCollisions();
@@ -475,7 +513,9 @@ void DemoApp::FixedUpdate(){
 }
 
 void DemoApp::Update(float elapsed){
-
+	if (TileCollisonX(bullet)){
+		bullet.visible = false;
+	}
 }
 
 void DemoApp::UpdateandRender(){
@@ -497,33 +537,33 @@ void DemoApp::UpdateandRender(){
 
 void DemoApp::worldToTileCoordinates(float X, float Y, int& gridX, int& gridY) {
 	gridX = (int)((X + (TILE_SIZE * mapWidth / 2)) / TILE_SIZE);
-	gridY = -(int)((Y - (TILE_SIZE * mapHeight / 2) )/ TILE_SIZE);
+	gridY = -(int)((Y - (TILE_SIZE * mapHeight / 2)) / TILE_SIZE);
 	return;
 }
 
 float DemoApp::tiletoWorldCoordinatesx(int gridX)
 {
-	float X = (gridX)*TILE_SIZE-(TILE_SIZE * mapWidth / 2);
+	float X = (gridX)*TILE_SIZE - (TILE_SIZE * mapWidth / 2);
 	return(X);
 }
 
 float DemoApp::tiletoWorldCoordinatesy(int gridY)
 {
-	float Y = ((-gridY)*TILE_SIZE)+ (TILE_SIZE * mapHeight / 2);
+	float Y = ((-gridY)*TILE_SIZE) + (TILE_SIZE * mapHeight / 2);
 	return(Y);
 }
 
 bool DemoApp::TileCollisonX(Entity &entity){
 	worldToTileCoordinates(entity.x, entity.y, entity.gridX, entity.gridY);
-	float widthhalf = entity.width/2;
-	float heighthalf = entity.height/2;
+	float widthhalf = entity.width / 2;
+	float heighthalf = entity.height / 2;
 	float left = entity.x - widthhalf;
 	float right = entity.x + widthhalf;
 	if (entity.gridY < mapHeight&&entity.gridX < mapWidth){
 		worldToTileCoordinates(left, entity.y, entity.gridX, entity.gridY);
 		if (levelData[entity.gridY][entity.gridX] != 0){
 			float x = tiletoWorldCoordinatesx(entity.gridX + 1);
-			entity.x +=x-left;
+			entity.x += x - left;
 			entity.velocity_x = 0;
 			entity.collideLeft = true;
 			return true;
@@ -531,21 +571,21 @@ bool DemoApp::TileCollisonX(Entity &entity){
 		worldToTileCoordinates(right, entity.y, entity.gridX, entity.gridY);
 		if (levelData[entity.gridY][entity.gridX] != 0){
 			float x = tiletoWorldCoordinatesx(entity.gridX);
-			entity.x += x-right;
+			entity.x += x - right;
 			entity.velocity_x = 0;
 			entity.collideRight = true;
 			return true;
 		}
 	}
 
-	
+
 	return false;
 }
 
 bool DemoApp::TileCollisonY(Entity &entity){
 	worldToTileCoordinates(entity.x, entity.y, entity.gridX, entity.gridY);
-	float widthhalf = entity.width/2;
-	float heighthalf = entity.height/2;
+	float widthhalf = entity.width / 2;
+	float heighthalf = entity.height / 2;
 	float bot = entity.y - heighthalf;
 	float top = entity.y + heighthalf;
 	if (entity.gridY < mapHeight&&entity.gridX < mapWidth){
@@ -560,7 +600,7 @@ bool DemoApp::TileCollisonY(Entity &entity){
 
 		worldToTileCoordinates(entity.x, top, entity.gridX, entity.gridY);
 		if (levelData[entity.gridY][entity.gridX] != 0){
-			float y_pen = tiletoWorldCoordinatesy(entity.gridY-TILE_SIZE);
+			float y_pen = tiletoWorldCoordinatesy(entity.gridY - TILE_SIZE);
 			entity.y -= y_pen - top;
 			entity.velocity_y = 0.0f;
 			entity.collideTop = true;
