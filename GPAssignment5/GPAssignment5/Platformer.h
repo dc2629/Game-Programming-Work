@@ -141,5 +141,4 @@ public:
 	bool TileCollisonX(Entity &entity);
 	bool TileCollisonY(Entity &entity);
 
-
 };

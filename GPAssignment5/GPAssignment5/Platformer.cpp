@@ -163,19 +163,20 @@ bool DemoApp::ProcessEvents(){
 		if (EVENT.type == SDL_QUIT || EVENT.type == SDL_WINDOWEVENT_CLOSE) {
 			return(true);
 		}
-		else if (EVENT.type == SDL_MOUSEMOTION){
-			float unitX = (((float)EVENT.motion.x / 800.0f)*2.66f) - 1.33f;
-			float unitY = (((float)(600 - EVENT.motion.y) / 600.0f) * 2.0f) - 1.0f;
-			player.x = unitX;
-			player.y = unitY;
-		}
-		else if (EVENT.type == SDL_MOUSEBUTTONDOWN){
-			worldToTileCoordinates(player.x, player.y, player.gridX, player.gridY);
-			cout << "This is x value: " << player.x << " and y value: " << player.y << endl;
-			cout << "This is the grid_X value: " << player.gridX << "and the grid_Y value: " << player.gridY << endl;
-			TileCollisonX(player);
-			TileCollisonY(player);
-		}
+		////HOW TO DEBUG EVERYTHING !
+		//else if (EVENT.type == SDL_MOUSEMOTION){
+		//	float unitX = (((float)EVENT.motion.x / 800.0f)*2.66f) - 1.33f;
+		//	float unitY = (((float)(600 - EVENT.motion.y) / 600.0f) * 2.0f) - 1.0f;
+		//	player.x = unitX;
+		//	player.y = unitY;
+		//}
+		//else if (EVENT.type == SDL_MOUSEBUTTONDOWN){
+		//	worldToTileCoordinates(player.x, player.y, player.gridX, player.gridY);
+		//	cout << "This is x value: " << player.x << " and y value: " << player.y << endl;
+		//	cout << "This is the grid_X value: " << player.gridX << "and the grid_Y value: " << player.gridY << endl;
+		//	TileCollisonY(player);
+		//	TileCollisonX(player);
+		//}
 
 	}
 	return false;
@@ -357,6 +358,8 @@ void DemoApp::GameRender(){
 
 	glPopMatrix();
 
+
+
 }
 
 void DemoApp::Render(){
@@ -364,7 +367,23 @@ void DemoApp::Render(){
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	if (State == STATE_GAME_LEVEL){
+		glPushMatrix();
+		glMatrixMode(GL_MODELVIEW);
+		float translateX = -player.x;
+		float translateY = -player.y;
+		if (translateY > 0)
+			translateY = 0.0;
+		if (translateX < -2.50){
+			translateX = -2.50;
+		}
+		if (translateX > 2.50){
+			translateX = 2.50;
+		}
+
+		glTranslatef(translateX, translateY, 0.0f);
+	
 		GameRender();
+		glPopMatrix();
 	}	
 
 	SDL_GL_SwapWindow(displayWindow);
@@ -414,14 +433,14 @@ void DemoApp::FixedUpdate(){
 
 
 	player.velocity_y += player.acceleration_y*FIXED_TIMESTEP;
-	//player.velocity_y += gravity_y*FIXED_TIMESTEP;
+	player.velocity_y += gravity_y*FIXED_TIMESTEP;
 	player.y += player.velocity_y*FIXED_TIMESTEP;
-
+	TileCollisonY(player);
 	
 
 	player.velocity_x += player.acceleration_x*FIXED_TIMESTEP;
 	player.x += player.velocity_x*FIXED_TIMESTEP;
-
+	TileCollisonX(player);
 
 	//for (int i = 0; i < enemies.size(); i++){
 	//	if (player.checkCollision(enemies[i])){
@@ -482,24 +501,38 @@ void DemoApp::worldToTileCoordinates(float X, float Y, int& gridX, int& gridY) {
 	return;
 }
 
+float DemoApp::tiletoWorldCoordinatesx(int gridX)
+{
+	float X = (gridX)*TILE_SIZE-(TILE_SIZE * mapWidth / 2);
+	return(X);
+}
+
+float DemoApp::tiletoWorldCoordinatesy(int gridY)
+{
+	float Y = ((-gridY)*TILE_SIZE)+ (TILE_SIZE * mapHeight / 2);
+	return(Y);
+}
+
 bool DemoApp::TileCollisonX(Entity &entity){
+	worldToTileCoordinates(entity.x, entity.y, entity.gridX, entity.gridY);
 	float widthhalf = entity.width/2;
 	float heighthalf = entity.height/2;
 	float left = entity.x - widthhalf;
 	float right = entity.x + widthhalf;
-	worldToTileCoordinates(entity.x, entity.y, entity.gridX, entity.gridY);
 	if (entity.gridY < mapHeight&&entity.gridX < mapWidth){
 		worldToTileCoordinates(left, entity.y, entity.gridX, entity.gridY);
 		if (levelData[entity.gridY][entity.gridX] != 0){
-			//entity.x += entity.gridX*TILE_SIZE + 0.01f;
-			cout << "Is colliding on the left" << endl;
+			float x = tiletoWorldCoordinatesx(entity.gridX + 1);
+			entity.x +=x-left;
+			entity.velocity_x = 0;
 			entity.collideLeft = true;
 			return true;
 		}
 		worldToTileCoordinates(right, entity.y, entity.gridX, entity.gridY);
 		if (levelData[entity.gridY][entity.gridX] != 0){
-			//entity.x -= entity.gridX*TILE_SIZE + 0.01f;
-			cout << "Is colliding on the right" << endl;
+			float x = tiletoWorldCoordinatesx(entity.gridX);
+			entity.x += x-right;
+			entity.velocity_x = 0;
 			entity.collideRight = true;
 			return true;
 		}
@@ -515,22 +548,21 @@ bool DemoApp::TileCollisonY(Entity &entity){
 	float heighthalf = entity.height/2;
 	float bot = entity.y - heighthalf;
 	float top = entity.y + heighthalf;
-	worldToTileCoordinates(entity.x, entity.y, entity.gridX, entity.gridY);
 	if (entity.gridY < mapHeight&&entity.gridX < mapWidth){
 		worldToTileCoordinates(entity.x, bot, entity.gridX, entity.gridY);
 		if (levelData[entity.gridY][entity.gridX] != 0){
-			//entity.y = 0;
-			//entity.velocity_y = 0.0f;
-			cout << "Is colliding on the bot" << endl;
+			float y_pen = tiletoWorldCoordinatesy(entity.gridY + .5*TILE_SIZE);
+			entity.y += y_pen - bot;
+			entity.velocity_y = 0.0f;
 			entity.collideBot = true;
 			return true;
 		}
 
 		worldToTileCoordinates(entity.x, top, entity.gridX, entity.gridY);
 		if (levelData[entity.gridY][entity.gridX] != 0){
-			//entity.y = 0;
-			//entity.velocity_y = 0.0f;
-			cout << "Is colliding on the top" << endl;
+			float y_pen = tiletoWorldCoordinatesy(entity.gridY-TILE_SIZE);
+			entity.y -= y_pen - top;
+			entity.velocity_y = 0.0f;
 			entity.collideTop = true;
 			return true;
 		}
