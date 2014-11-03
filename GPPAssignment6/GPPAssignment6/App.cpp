@@ -1,5 +1,22 @@
 #include"App.h"
 
+float lerp(float v0, float v1, float t) {
+	return (1.0f - t)*v0 + t*v1;
+}
+
+void App::checkCollision(){
+
+	for (int i = 0; i < Entities.size(); i++){
+		for (int y = 0; y < Entities.size(); y++){
+			if (i != y){
+				if (Entities[i]->checkCollision(*Entities[y]) && Entities[y]->checkCollision(*Entities[i])){
+					cout << "Hello World" << endl;
+				}
+			}
+		}
+	}
+};
+
 GLuint LoadTexture(const char* image_path) {
 	SDL_Surface *surface = IMG_Load(image_path);
 	GLuint textureID;
@@ -39,6 +56,8 @@ bool App::ProcessEvents(){
 		}
 		else if (EVENT.type == SDL_MOUSEBUTTONDOWN){
 			//worldToTileCoordinates(player.x, player.y, player.gridX, player.gridY);
+			checkCollision();
+
 			cout << "This is x value: " << player.x << " and y value: " << player.y << endl;
 			/*cout << "This is the gridX value: " << player.gridX << "and the gridY value: " << player.gridY << endl;*/
 		}
@@ -59,6 +78,8 @@ void App::Init(){
 	glMatrixMode(GL_PROJECTION);//Usually ran once and thats it.
 	glOrtho(-1.33, 1.33, -1, 1, -1, 1);//The ratio of resolutions
 
+	float timeLeftOver = 0.0f;
+
 	SpriteSheetTextureID = LoadTexture("SpriteSheet.png");
 
 	player.textureID = SpriteSheetTextureID;
@@ -69,26 +90,26 @@ void App::Init(){
 	player.y = .2;
 	player.width = .1;
 	player.height = .1;	
-	player.rotation = 180;
+	player.rotation = 0;
 	Entities.push_back(&player);
 
-	for (int i = 0; i < 5; i++){
+	//for (int i = 0; i < 5; i++){
 
-		
+	int i = 0;
 		Ast[i].textureID = SpriteSheetTextureID;
 		Ast[i].spriteCountX = 16;
 		Ast[i].spriteCountY = 8;
 		Ast[i].index = 6;
 		Ast[i].height = .1;
 		Ast[i].width = .1;
-		Ast[i].x = RANDOM_NUMBER;
-		Ast[i].y = RANDOM_NUMBER;
-		Ast[i].rotation = RANDOM_NUMBER * 360;
+		Ast[i].x = 0;
+		Ast[i].y = 0;
+		Ast[i].rotation = 0;
 
 		Ast[i].velocity_x = RANDOM_NUMBER / 10;
 		Ast[i].velocity_y = RANDOM_NUMBER / 10;
 		Entities.push_back(&Ast[i]);
-	}
+	/*}*/
 
 
 }
@@ -104,4 +125,37 @@ void App::Render(){
 	SDL_GL_SwapWindow(displayWindow);
 }
 
+void App::FixedUpdate(){
+	player.velocity_y += player.acceleration_y*FIXED_TIMESTEP;
+	player.y += player.velocity_y*FIXED_TIMESTEP;
+
+
+	player.velocity_x += player.acceleration_x*FIXED_TIMESTEP;
+	player.x += player.velocity_x*FIXED_TIMESTEP;
+
+	player.acceleration_x = 0.0f;
+
+	player.resetCollisions();
+
+
+	player.velocity_y = lerp(player.velocity_y, 0.0f, FIXED_TIMESTEP*0.5f);
+	player.velocity_x = lerp(player.velocity_x, 0.0f, FIXED_TIMESTEP*0.5f);
+}
+
+void App::UpdateandRender(){
+	float ticks = (float)SDL_GetTicks() / 1000.0f;
+	float elapsed = ticks - lastFrameTicks;
+	float fixedElapsed = elapsed + timeLeftOver;
+	if (fixedElapsed > FIXED_TIMESTEP * MAX_TIMESTEP) {
+		fixedElapsed = FIXED_TIMESTEP * MAX_TIMESTEP;
+	}
+	while (fixedElapsed >= FIXED_TIMESTEP) {
+		fixedElapsed -= FIXED_TIMESTEP;
+		FixedUpdate();
+	}
+	timeLeftOver = fixedElapsed;
+
+	//Update(elapsed);
+	Render();
+}
 

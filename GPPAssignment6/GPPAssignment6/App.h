@@ -1,4 +1,8 @@
 #pragma once
+
+#define FIXED_TIMESTEP 0.016667
+#define MAX_TIMESTEP 6
+
 #include"MatrixEntities.h"
 
 class App{
@@ -26,5 +30,7 @@ public:
 	const Uint8* keys;
 	SDL_Window* displayWindow;
 
+	float timeLeftOver;
 
+	void checkCollision();
 };

@@ -238,14 +238,47 @@ void Entity::Draw() {
 void MatrixToVec(Entity A,Vector& C){
 	Vector temp;
 	temp = C;
-	C = A.matrix.inverse*temp;
+	C = A.matrix.inverse()*temp;
 }
 
-bool checkCollision(Entity A,Entity B){
-	Vector tRightA, tLeftA, bRightA, bLeftA;
-	Vector tRightB, tLeftB, bRightB, bLeftB;
-	tRightA.x = A.x + A.width / 2;
-	tRightA.y = A.x + A.height / 2;
-	MatrixToVec(A, tRightA);
+bool Entity::checkCollision(Entity A){
+	Vector tRight, tLeft, bRight, bLeft;
+	
+	tRight.x = A.x + A.width / 2;
+	tRight.y = A.x + A.height / 2;
+	MatrixToVec(*this, tRight);
 
-};
+	tLeft.x = A.x - A.width / 2;
+	tLeft.y = A.x + A.height / 2;
+	MatrixToVec(*this, tLeft);
+
+	bRight.x = A.x + A.width / 2;
+	bRight.y = A.x - A.height / 2;
+	MatrixToVec(*this, bRight);
+
+	bLeft.x = A.x - A.width / 2;
+	bLeft.y = A.x - A.height / 2;
+	MatrixToVec(*this, bLeft);
+
+	float max_x = max(max(tRight.x, tLeft.x), max(bRight.x, bLeft.x));
+	float max_y = max(max(tRight.y, tLeft.y), max(bRight.y, bLeft.y));
+	float min_x = min(min(tRight.x, tLeft.x), min(bRight.x, bLeft.x));
+	float min_y = min(min(tRight.y, tLeft.y), min(bRight.y, bLeft.y));
+	cout << max_x << " " << min_x << " " << max_y << " " << min_y << endl;
+	if (!(((min_x <= x+(width / 2)) && (max_x >= x-(width / 2))))){
+		return false;
+	}
+	if (!((min_y <= y+(height / 2)) && (max_y >= y-(height / 2)))){
+		return false;
+	}
+	
+	return true;
+	
+}
+
+void Entity::resetCollisions(){
+	collideBot = false;
+	collideLeft = false;
+	collideRight = false;
+	collideTop = false;
+}

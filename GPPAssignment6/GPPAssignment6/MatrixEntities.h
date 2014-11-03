@@ -83,6 +83,6 @@ public:
 	void Draw();
 
 	void resetCollisions();
-
+	bool checkCollision(Entity A);
 };
 
