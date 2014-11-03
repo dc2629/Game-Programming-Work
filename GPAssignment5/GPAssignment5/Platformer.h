@@ -109,7 +109,7 @@ public:
 	void Update(float elapsed);
 
 	float lastFrameTicks;
-
+	
 	vector<Entity*> entities;
 
 	GLuint SpriteSheetTextureID;

@@ -162,10 +162,10 @@ Entity::Entity(){
 void Entity::buildMatrix(){
 	Matrix rotate;
 	rotate.identity();
-	rotate.m[0][0] = cos((rotation / 180) * PI);
-	rotate.m[0][1] = -sin((rotation / 180) * PI);
-	rotate.m[1][0] = sin((rotation / 180) * PI);
-	rotate.m[1][1] = cos((rotation / 180) * PI);
+	rotate.m[0][0] = cos(rotation / 180 * PI);
+	rotate.m[0][1] = -sin(rotation / 180 * PI);
+	rotate.m[1][0] = sin(rotation / 180 * PI);
+	rotate.m[1][1] = cos(rotation / 180 * PI);
 
 	Matrix scale;
 	scale.identity();
