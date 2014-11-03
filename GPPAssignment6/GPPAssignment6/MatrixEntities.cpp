@@ -189,6 +189,7 @@ void Entity::Render(){
 	buildMatrix();
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
+	
 	glMultMatrixf(matrix.ml);
 
 	//GLfloat quad[] = { -width / 2, height / 2,
@@ -234,7 +235,17 @@ void Entity::Draw() {
 
 }
 
-//bool Entity::checkCollision(Entity A){
-//	A.matrix.inverse();
-//
-//};
+void MatrixToVec(Entity A,Vector& C){
+	Vector temp;
+	temp = C;
+	C = A.matrix.inverse*temp;
+}
+
+bool checkCollision(Entity A,Entity B){
+	Vector tRightA, tLeftA, bRightA, bLeftA;
+	Vector tRightB, tLeftB, bRightB, bLeftB;
+	tRightA.x = A.x + A.width / 2;
+	tRightA.y = A.x + A.height / 2;
+	MatrixToVec(A, tRightA);
+
+};

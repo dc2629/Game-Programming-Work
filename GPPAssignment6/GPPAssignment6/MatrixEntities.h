@@ -12,7 +12,7 @@
 #include<SDL_mixer.h>
 
 #define RANDOM_NUMBER ((float)rand()/(float)RAND_MAX)
-#define PI 3.1415
+#define PI 3.14159265359
 
 using namespace std;
 
@@ -83,8 +83,6 @@ public:
 	void Draw();
 
 	void resetCollisions();
-	float CalculateY_Pen(Entity A);
-	float CalculateX_Pen(Entity A);
-	bool checkCollision(Entity A);
+
 };
 

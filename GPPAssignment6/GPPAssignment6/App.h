@@ -21,20 +21,10 @@ public:
 
 	vector<Entity*> Entities;
 	Entity player;
+	Entity Ast[5];
 
 	const Uint8* keys;
 	SDL_Window* displayWindow;
 
-	bool App::readHeader(ifstream &stream);
-	bool readLayerData(ifstream &stream);
-	void buildLevel();
-
-	unsigned char** levelData;
-	vector<float> levelvertexData;
-	vector<float> leveltexCoordData;
-
-	int mapWidth;
-	int mapHeight;
-	float TILE_SIZE;
 
 };

@@ -29,8 +29,13 @@ bool App::ProcessEvents(){
 		else if (EVENT.type == SDL_MOUSEMOTION){
 			float unitX = (((float)EVENT.motion.x / 800.0f)*2.66f) - 1.33f;
 			float unitY = (((float)(600 - EVENT.motion.y) / 600.0f) * 2.0f) - 1.0f;
-			player.x = unitX;
-			player.y = unitY;
+			Vector A, B;
+			A.x = unitX;
+			A.y = unitY;
+			A.z = 0;
+			B = player.matrix*A;
+			player.x = B.x;
+			player.y = B.y;
 		}
 		else if (EVENT.type == SDL_MOUSEBUTTONDOWN){
 			//worldToTileCoordinates(player.x, player.y, player.gridX, player.gridY);
@@ -64,8 +69,28 @@ void App::Init(){
 	player.y = .2;
 	player.width = .1;
 	player.height = .1;	
-	player.rotation = 0;
+	player.rotation = 180;
 	Entities.push_back(&player);
+
+	for (int i = 0; i < 5; i++){
+
+		
+		Ast[i].textureID = SpriteSheetTextureID;
+		Ast[i].spriteCountX = 16;
+		Ast[i].spriteCountY = 8;
+		Ast[i].index = 6;
+		Ast[i].height = .1;
+		Ast[i].width = .1;
+		Ast[i].x = RANDOM_NUMBER;
+		Ast[i].y = RANDOM_NUMBER;
+		Ast[i].rotation = RANDOM_NUMBER * 360;
+
+		Ast[i].velocity_x = RANDOM_NUMBER / 10;
+		Ast[i].velocity_y = RANDOM_NUMBER / 10;
+		Entities.push_back(&Ast[i]);
+	}
+
+
 }
 
 void App::Render(){
@@ -79,99 +104,4 @@ void App::Render(){
 	SDL_GL_SwapWindow(displayWindow);
 }
 
-bool App::readHeader(ifstream &stream) {
-	string line;
-	while (getline(stream, line)) {
-		if (line == "") { break; }
-
-		istringstream sStream(line);
-		string key, value;
-		getline(sStream, key, '=');
-		getline(sStream, value);
-
-		if (key == "width") {
-			mapWidth = atoi(value.c_str());
-		}
-		else if (key == "height"){
-			mapHeight = atoi(value.c_str());
-		}
-	}
-
-	if (mapWidth == -1 || mapHeight == -1) {
-		return false;
-	}
-	else { // allocate our map data
-		levelData = new unsigned char*[mapHeight];
-		for (int i = 0; i < mapHeight; ++i) {
-			levelData[i] = new unsigned char[mapWidth];
-		}
-		return true;
-	}
-}
-
-bool App::readLayerData(ifstream &stream) {
-	string line;
-	while (getline(stream, line)) {
-		if (line == "") { break; }
-		istringstream sStream(line);
-		string key, value;
-		getline(sStream, key, '=');
-		getline(sStream, value);
-		if (key == "data") {
-			for (int y = 0; y < mapHeight; y++) {
-				getline(stream, line);
-				istringstream lineStream(line);
-				string tile;
-				for (int x = 0; x < mapWidth; x++) {
-					getline(lineStream, tile, ',');
-					unsigned char val = (unsigned char)atoi(tile.c_str());
-					if (val > 0) {
-						// be careful, the tiles in this format are indexed from 1 not 0
-						levelData[y][x] = val - 1;
-					}
-					else {
-						levelData[y][x] = 0;
-					}
-				}
-			}
-		}
-	}
-	return true;
-}
-
-void App::buildLevel() {
-	//change based map
-	int SPRITE_COUNT_X = 16;
-	int SPRITE_COUNT_Y = 8;
-
-	vector<float> vertexData;
-	vector<float> texCoordData;
-
-	for (int y = 0; y < mapHeight; y++) {
-		for (int x = 0; x < mapWidth; x++) {
-			if (levelData[y][x] != 0) {
-
-				float u = (float)(((int)levelData[y][x]) % SPRITE_COUNT_X) / (float)SPRITE_COUNT_X;
-				float v = (float)(((int)levelData[y][x]) / SPRITE_COUNT_X) / (float)SPRITE_COUNT_Y;
-				float spriteWidth = 1.0f / (float)SPRITE_COUNT_X;
-				float spriteHeight = 1.0f / (float)SPRITE_COUNT_Y;
-				vertexData.insert(vertexData.end(), {
-					TILE_SIZE * x, -TILE_SIZE * y,
-					TILE_SIZE * x, (-TILE_SIZE * y) - TILE_SIZE,
-					(TILE_SIZE * x) + TILE_SIZE, (-TILE_SIZE * y) - TILE_SIZE,
-					(TILE_SIZE * x) + TILE_SIZE, -TILE_SIZE * y
-				});
-				texCoordData.insert(texCoordData.end(), { u + 0.002f, v,
-					u + 0.002f, v + (spriteHeight),
-					u + spriteWidth - 0.002f, v + (spriteHeight),
-					u + spriteWidth - 0.002f, v
-				});
-
-
-			}
-		}
-	}
-	levelvertexData = vertexData;
-	leveltexCoordData = texCoordData;
-}
 
