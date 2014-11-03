@@ -38,6 +38,16 @@ App::~App(){
 	SDL_Quit();
 }
 
+void myglTranslate(float x, float y, Entity& Entity){
+	Vector A, B;
+	A.x = x;
+	A.y = y;
+	A.z = 0;
+	B = Entity.matrix*A;
+	Entity.x = B.x;
+	Entity.y = B.y;
+}
+
 bool App::ProcessEvents(){
 	while (SDL_PollEvent(&EVENT)) {
 		if (EVENT.type == SDL_QUIT || EVENT.type == SDL_WINDOWEVENT_CLOSE) {
@@ -46,13 +56,7 @@ bool App::ProcessEvents(){
 		else if (EVENT.type == SDL_MOUSEMOTION){
 			float unitX = (((float)EVENT.motion.x / 800.0f)*2.66f) - 1.33f;
 			float unitY = (((float)(600 - EVENT.motion.y) / 600.0f) * 2.0f) - 1.0f;
-			Vector A, B;
-			A.x = unitX;
-			A.y = unitY;
-			A.z = 0;
-			B = player.matrix*A;
-			player.x = B.x;
-			player.y = B.y;
+			myglTranslate(unitX, unitY, player);
 		}
 		else if (EVENT.type == SDL_MOUSEBUTTONDOWN){
 			//worldToTileCoordinates(player.x, player.y, player.gridX, player.gridY);
@@ -94,8 +98,7 @@ void App::Init(){
 	Entities.push_back(&player);
 
 	//for (int i = 0; i < 5; i++){
-
-	int i = 0;
+		int i = 0;
 		Ast[i].textureID = SpriteSheetTextureID;
 		Ast[i].spriteCountX = 16;
 		Ast[i].spriteCountY = 8;
@@ -104,12 +107,13 @@ void App::Init(){
 		Ast[i].width = .1;
 		Ast[i].x = 0;
 		Ast[i].y = 0;
-		Ast[i].rotation = 0;
+		//myglTranslate(.3, .2, Ast[i]);
+		Ast[i].rotation = 45;
 
 		Ast[i].velocity_x = RANDOM_NUMBER / 10;
 		Ast[i].velocity_y = RANDOM_NUMBER / 10;
 		Entities.push_back(&Ast[i]);
-	/*}*/
+	//}
 
 
 }

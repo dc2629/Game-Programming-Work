@@ -177,7 +177,7 @@ void Entity::buildMatrix(){
 	translate.m[0][3] = x;
 	translate.m[1][3] = y;
 
-	Matrix nTransposed = scale*rotate*translate;
+	Matrix nTransposed = translate*rotate*scale;
 	for (int i = 0; i < 4; i++){
 		for (int y = 0; y < 4; y++){
 			matrix.m[y][i] = nTransposed.m[i][y];
@@ -235,43 +235,53 @@ void Entity::Draw() {
 
 }
 
-void MatrixToVec(Entity A,Vector& C){
+void iMatrixToVec(Entity A,Vector& C){
 	Vector temp;
 	temp = C;
 	C = A.matrix.inverse()*temp;
+}
+
+void MatrixToVec(Entity A, Vector& C){
+	Vector temp;
+	temp = C;
+	C = A.matrix*temp;
 }
 
 bool Entity::checkCollision(Entity A){
 	Vector tRight, tLeft, bRight, bLeft;
 	
 	tRight.x = A.x + A.width / 2;
-	tRight.y = A.x + A.height / 2;
-	MatrixToVec(*this, tRight);
+	tRight.y = A.y + A.height / 2;
+	MatrixToVec(A, tRight);
+	iMatrixToVec(*this, tRight);
 
 	tLeft.x = A.x - A.width / 2;
-	tLeft.y = A.x + A.height / 2;
-	MatrixToVec(*this, tLeft);
+	tLeft.y = A.y + A.height / 2;
+	MatrixToVec(A, tLeft);
+	iMatrixToVec(*this, tLeft);
 
 	bRight.x = A.x + A.width / 2;
-	bRight.y = A.x - A.height / 2;
-	MatrixToVec(*this, bRight);
+	bRight.y = A.y - A.height / 2;
+	MatrixToVec(A, bRight);
+	iMatrixToVec(*this, bRight);
 
 	bLeft.x = A.x - A.width / 2;
-	bLeft.y = A.x - A.height / 2;
-	MatrixToVec(*this, bLeft);
+	bLeft.y = A.y - A.height / 2;
+	MatrixToVec(A, bLeft);
+	iMatrixToVec(*this, bLeft);
 
 	float max_x = max(max(tRight.x, tLeft.x), max(bRight.x, bLeft.x));
 	float max_y = max(max(tRight.y, tLeft.y), max(bRight.y, bLeft.y));
 	float min_x = min(min(tRight.x, tLeft.x), min(bRight.x, bLeft.x));
 	float min_y = min(min(tRight.y, tLeft.y), min(bRight.y, bLeft.y));
 	cout << max_x << " " << min_x << " " << max_y << " " << min_y << endl;
-	if (!(((min_x <= x+(width / 2)) && (max_x >= x-(width / 2))))){
+	if (!(((min_x <= (width / 2)) && (max_x >= -(width / 2))) && (((min_y <= (height / 2)) && (max_y >= -(height / 2)))))){
 		return false;
 	}
-	if (!((min_y <= y+(height / 2)) && (max_y >= y-(height / 2)))){
-		return false;
-	}
-	
+	//if (!(((min_y <= (height / 2)) && (max_y >= -(height / 2))))){
+	//	return false;
+	//}
+	//
 	return true;
 	
 }
