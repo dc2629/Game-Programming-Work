@@ -37,9 +37,4 @@ public:
 	int mapHeight;
 	float TILE_SIZE;
 
-	void worldToTileCoordinates(float X, float Y, int& gridX, int& gridY);
-	float tiletoWorldCoordinatesx(int gridX);
-	float tiletoWorldCoordinatesy(int gridY);
-	bool TileCollisonX(Entity &entity);
-	bool TileCollisonY(Entity &entity);
 };

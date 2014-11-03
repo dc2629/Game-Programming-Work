@@ -33,7 +33,7 @@ bool App::ProcessEvents(){
 			player.y = unitY;
 		}
 		else if (EVENT.type == SDL_MOUSEBUTTONDOWN){
-			worldToTileCoordinates(player.x, player.y, player.gridX, player.gridY);
+			//worldToTileCoordinates(player.x, player.y, player.gridX, player.gridY);
 			cout << "This is x value: " << player.x << " and y value: " << player.y << endl;
 			/*cout << "This is the gridX value: " << player.gridX << "and the gridY value: " << player.gridY << endl;*/
 		}
@@ -175,79 +175,3 @@ void App::buildLevel() {
 	leveltexCoordData = texCoordData;
 }
 
-void App::worldToTileCoordinates(float X, float Y, int& gridX, int& gridY) {
-	gridX = (int)((X + (TILE_SIZE * mapWidth / 2)) / TILE_SIZE);
-	gridY = -(int)((Y - (TILE_SIZE * mapHeight / 2)) / TILE_SIZE);
-	return;
-}
-
-float App::tiletoWorldCoordinatesx(int gridX)
-{
-	float X = (gridX)*TILE_SIZE - (TILE_SIZE * mapWidth / 2);
-	return(X);
-}
-
-float App::tiletoWorldCoordinatesy(int gridY)
-{
-	float Y = ((-gridY)*TILE_SIZE) + (TILE_SIZE * mapHeight / 2);
-	return(Y);
-}
-
-bool App::TileCollisonX(Entity &entity){
-	worldToTileCoordinates(entity.x, entity.y, entity.gridX, entity.gridY);
-	float widthhalf = entity.width / 2;
-	float heighthalf = entity.height / 2;
-	float left = entity.x - widthhalf;
-	float right = entity.x + widthhalf;
-	if (entity.gridY < mapHeight&&entity.gridX < mapWidth){
-		worldToTileCoordinates(left, entity.y, entity.gridX, entity.gridY);
-		if (levelData[entity.gridY][entity.gridX] != 0){
-			float x = tiletoWorldCoordinatesx(entity.gridX + 1);
-			entity.x += x - left;
-			entity.velocity_x = 0;
-			entity.collideLeft = true;
-			return true;
-		}
-		worldToTileCoordinates(right, entity.y, entity.gridX, entity.gridY);
-		if (levelData[entity.gridY][entity.gridX] != 0){
-			float x = tiletoWorldCoordinatesx(entity.gridX);
-			entity.x += x - right;
-			entity.velocity_x = 0;
-			entity.collideRight = true;
-			return true;
-		}
-	}
-
-
-	return false;
-}
-
-bool App::TileCollisonY(Entity &entity){
-	worldToTileCoordinates(entity.x, entity.y, entity.gridX, entity.gridY);
-	float widthhalf = entity.width / 2;
-	float heighthalf = entity.height / 2;
-	float bot = entity.y - heighthalf;
-	float top = entity.y + heighthalf;
-	if (entity.gridY < mapHeight&&entity.gridX < mapWidth){
-		worldToTileCoordinates(entity.x, bot, entity.gridX, entity.gridY);
-		if (levelData[entity.gridY][entity.gridX] != 0){
-			float y_pen = tiletoWorldCoordinatesy(entity.gridY + .5*TILE_SIZE);
-			entity.y += y_pen - bot;
-			entity.velocity_y = 0.0f;
-			entity.collideBot = true;
-			return true;
-		}
-
-		worldToTileCoordinates(entity.x, top, entity.gridX, entity.gridY);
-		if (levelData[entity.gridY][entity.gridX] != 0){
-			float y_pen = tiletoWorldCoordinatesy(entity.gridY - TILE_SIZE);
-			entity.y -= y_pen - top;
-			entity.velocity_y = 0.0f;
-			entity.collideTop = true;
-			return true;
-		}
-	}
-
-
-	return false;
-}
