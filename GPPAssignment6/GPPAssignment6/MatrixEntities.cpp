@@ -191,43 +191,50 @@ void Entity::Render(){
 	glPushMatrix();
 	glMultMatrixf(matrix.ml);
 
-	GLfloat quad[] = { -width / 2, height / 2,
-		-width / 2, -height / 2,
-		width / 2, -height / 2,
-		width / 2, height / 2
-	};
-	glVertexPointer(2, GL_FLOAT, 0, quad);
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glDrawArrays(GL_QUADS, 0, 4);
-	
+	//GLfloat quad[] = { -width / 2, height / 2,
+	//	-width / 2, -height / 2,
+	//	width / 2, -height / 2,
+	//	width / 2, height / 2
+	//};
+	//glVertexPointer(2, GL_FLOAT, 0, quad);
+	//glEnableClientState(GL_VERTEX_ARRAY);
+	//glDrawArrays(GL_QUADS, 0, 4);
+
+	Draw();
+
 	glPopMatrix();	
 }
 
 void Entity::Draw() {
-	//if (visible){
-	//	glEnable(GL_TEXTURE_2D);//enable or disable server-side GL capabilities, in this case enables 2d textures.
-	//	glBindTexture(GL_TEXTURE_2D, textureID);//binds texture to target. Binds an image to the texture map.
+	if (visible){
+		glEnable(GL_TEXTURE_2D);//enable or disable server-side GL capabilities, in this case enables 2d textures.
+		glBindTexture(GL_TEXTURE_2D, textureID);//binds texture to target. Binds an image to the texture map.
 
-	//	float u = (float)(((int)index) % spriteCountX) / (float)spriteCountX;
-	//	float v = (float)(((int)index) / spriteCountX) / (float)spriteCountY;
-	//	float spriteWidth = 1.0f / (float)spriteCountX;
-	//	float spriteHeight = 1.0f / (float)spriteCountY;
+		float u = (float)(((int)index) % spriteCountX) / (float)spriteCountX;
+		float v = (float)(((int)index) / spriteCountX) / (float)spriteCountY;
+		float spriteWidth = 1.0f / (float)spriteCountX;
+		float spriteHeight = 1.0f / (float)spriteCountY;
 
-	//	GLfloat quadUVs[] = { u, v, u, v + spriteHeight, u + spriteWidth, v + spriteHeight, u + spriteWidth, v };
+		GLfloat quadUVs[] = { u, v, u, v + spriteHeight, u + spriteWidth, v + spriteHeight, u + spriteWidth, v };
 
-	//	GLfloat quad[] = { -width / 2, height / 2, -width / 2, -height / 2, width / 2, -height / 2, width / 2, height / 2 };//Defines a quad to place the image. REMEMBER COUNTER CLOCKWISE LISTING OF VERTICES
-	//	glVertexPointer(2, GL_FLOAT, 0, quad);//Read 2, FLOAT VALUES, SKIP 0 values in case we put colors in the matrix, and quad is the pointer to the array.
-	//	glEnableClientState(GL_VERTEX_ARRAY);//allows for server to access the vertex arrays and for clients to draw the arrays.
-	//	glTexCoordPointer(2, GL_FLOAT, 0, quadUVs);//Defines an array of texture coordinates 
-	//	glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	//	glEnable(GL_BLEND);//Enable blending
-	//	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);//Alpha blending, basically removing the background of the quad.
-	//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	//	glDrawArrays(GL_QUADS, 0, 4);//Drawing quads, starting from 0, and draw 4 vertices. 
-	//	glDisable(GL_TEXTURE_2D);//Disable the texture since OpenGl won't use the same texture when redrawing other quads.
-	//	glDisable(GL_BLEND);
-	//	glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	//}
+		GLfloat quad[] = { -width / 2, height / 2, -width / 2, -height / 2, width / 2, -height / 2, width / 2, height / 2 };//Defines a quad to place the image. REMEMBER COUNTER CLOCKWISE LISTING OF VERTICES
+		glVertexPointer(2, GL_FLOAT, 0, quad);//Read 2, FLOAT VALUES, SKIP 0 values in case we put colors in the matrix, and quad is the pointer to the array.
+		glEnableClientState(GL_VERTEX_ARRAY);//allows for server to access the vertex arrays and for clients to draw the arrays.
+		glTexCoordPointer(2, GL_FLOAT, 0, quadUVs);//Defines an array of texture coordinates 
+		glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+		glEnable(GL_BLEND);//Enable blending
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);//Alpha blending, basically removing the background of the quad.
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glDrawArrays(GL_QUADS, 0, 4);//Drawing quads, starting from 0, and draw 4 vertices. 
+		glDisable(GL_TEXTURE_2D);//Disable the texture since OpenGl won't use the same texture when redrawing other quads.
+		glDisable(GL_BLEND);
+		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	}
 
 }
+
+//bool Entity::checkCollision(Entity A){
+//	A.matrix.inverse();
+//
+//};

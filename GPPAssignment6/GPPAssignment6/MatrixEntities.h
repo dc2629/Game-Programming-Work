@@ -48,7 +48,8 @@ public:
 	Matrix matrix;
 	float x;
 	float y;
-
+	int gridX;
+	int gridY;
 	float width;
 	float height;
 
@@ -56,6 +57,21 @@ public:
 	float scale_y;
 	float rotation;
 	bool visible;
+
+	float velocity_x;
+	float velocity_y;
+
+	float acceleration_x;
+	float acceleration_y;
+
+	float mass;
+	float friction_x;
+	float friction_y;
+
+	bool collideRight;
+	bool collideLeft;
+	bool collideTop;
+	bool collideBot;
 
 	void buildMatrix();
 	void Render();
@@ -65,5 +81,10 @@ public:
 	int spriteCountX;
 	int spriteCountY;
 	void Draw();
+
+	void resetCollisions();
+	float CalculateY_Pen(Entity A);
+	float CalculateX_Pen(Entity A);
+	bool checkCollision(Entity A);
 };
 

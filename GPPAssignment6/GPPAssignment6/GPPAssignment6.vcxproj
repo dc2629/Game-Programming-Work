@@ -88,6 +88,9 @@
     <ClInclude Include="App.h" />
     <ClInclude Include="MatrixEntities.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="SpriteSheet.png" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

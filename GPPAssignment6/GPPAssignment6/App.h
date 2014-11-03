@@ -19,8 +19,27 @@ public:
 
 	GLuint SpriteSheetTextureID;
 
-	vector<Entity> Entities;
+	vector<Entity*> Entities;
+	Entity player;
 
 	const Uint8* keys;
 	SDL_Window* displayWindow;
+
+	bool App::readHeader(ifstream &stream);
+	bool readLayerData(ifstream &stream);
+	void buildLevel();
+
+	unsigned char** levelData;
+	vector<float> levelvertexData;
+	vector<float> leveltexCoordData;
+
+	int mapWidth;
+	int mapHeight;
+	float TILE_SIZE;
+
+	void worldToTileCoordinates(float X, float Y, int& gridX, int& gridY);
+	float tiletoWorldCoordinatesx(int gridX);
+	float tiletoWorldCoordinatesy(int gridY);
+	bool TileCollisonX(Entity &entity);
+	bool TileCollisonY(Entity &entity);
 };
