@@ -6,7 +6,7 @@ using namespace std;
 int main(int argc, char *argv[]){
 	App hi;
 	while (!hi.ProcessEvents()){
-		hi.Render();
+		hi.UpdateandRender();
 	}
 
 	return 0;

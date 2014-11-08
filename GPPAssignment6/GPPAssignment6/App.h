@@ -20,12 +20,14 @@ public:
 	void Update(float elapsed);
 
 	float lastFrameTicks;
+	float delay;
 
 	GLuint SpriteSheetTextureID;
 
 	vector<Entity*> Entities;
 	Entity player;
-	Entity Ast[5];
+	Entity Ast[10];
+	
 
 	const Uint8* keys;
 	SDL_Window* displayWindow;
