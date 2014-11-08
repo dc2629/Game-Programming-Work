@@ -143,9 +143,9 @@ Matrix Matrix::operator*(const Matrix& m2){
 
 Vector Matrix::operator*(const Vector &v){
 	Vector product;
-	product.x = m[0][0] * v.x + m[0][1] * v.y + m[0][2] * v.z + m[0][3];
-	product.y = m[1][0] * v.x + m[1][1] * v.y + m[1][2] * v.z + m[1][3];
-	product.z = m[2][0] * v.x + m[2][1] * v.y + m[2][2] * v.z + m[2][3];
+	product.x = m[0][0] * v.x + m[1][0] * v.y + m[2][0] * v.z + m[3][0];
+	product.y = m[0][1] * v.x + m[1][1] * v.y + m[2][1] * v.z + m[3][1];
+	product.z = m[0][2] * v.x + m[1][2] * v.y + m[2][2] * v.z + m[3][2];
 
 	return product;
 };
@@ -241,40 +241,39 @@ void iMatrixToVec(Entity A,Vector& C){
 	C = A.matrix.inverse()*temp;
 }
 
-void MatrixToVec(Entity A, Vector& C){
-	Vector temp;
-	temp = C;
-	C = A.matrix*temp;
-}
+//void MatrixToVec(Entity A, Vector& C){
+//	Vector temp;
+//	temp = C;
+//	C = A.matrix*temp;
+//}
 
 bool Entity::checkCollision(Entity A){
 	Vector tRight, tLeft, bRight, bLeft;
 	
 	tRight.x = A.x + A.width / 2;
 	tRight.y = A.y + A.height / 2;
-	MatrixToVec(A, tRight);
+	//MatrixToVec(A, tRight);
 	iMatrixToVec(*this, tRight);
 
 	tLeft.x = A.x - A.width / 2;
 	tLeft.y = A.y + A.height / 2;
-	MatrixToVec(A, tLeft);
+	//MatrixToVec(A, tLeft);
 	iMatrixToVec(*this, tLeft);
 
 	bRight.x = A.x + A.width / 2;
 	bRight.y = A.y - A.height / 2;
-	MatrixToVec(A, bRight);
+	//MatrixToVec(A, bRight);
 	iMatrixToVec(*this, bRight);
 
 	bLeft.x = A.x - A.width / 2;
 	bLeft.y = A.y - A.height / 2;
-	MatrixToVec(A, bLeft);
+	//MatrixToVec(A, bLeft);
 	iMatrixToVec(*this, bLeft);
 
 	float max_x = max(max(tRight.x, tLeft.x), max(bRight.x, bLeft.x));
 	float max_y = max(max(tRight.y, tLeft.y), max(bRight.y, bLeft.y));
 	float min_x = min(min(tRight.x, tLeft.x), min(bRight.x, bLeft.x));
 	float min_y = min(min(tRight.y, tLeft.y), min(bRight.y, bLeft.y));
-	cout << max_x << " " << min_x << " " << max_y << " " << min_y << endl;
 	if (!(((min_x <= (width / 2)) && (max_x >= -(width / 2))) && (((min_y <= (height / 2)) && (max_y >= -(height / 2)))))){
 		return false;
 	}
