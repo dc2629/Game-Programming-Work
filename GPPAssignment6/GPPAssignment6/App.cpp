@@ -147,14 +147,17 @@ void App::Render(){
 void App::FixedUpdate(){
 
 	for (int y = 0; y < 20; y++){
-		bullets[y].x += bullets[y].velocity_x;// *FIXED_TIMESTEP; Computers too laggy to run it as it's suppose to.
-		bullets[y].y += bullets[y].velocity_y;// *FIXED_TIMESTEP; Computers too laggy to run it as it's suppose to.
+		bullets[y].x += bullets[y].velocity_x*FIXED_TIMESTEP;// Computers too laggy to run it as it's suppose to.
+		bullets[y].y += bullets[y].velocity_y*FIXED_TIMESTEP;// Computers too laggy to run it as it's suppose to.
 		for (int i = 1; i < Entities.size(); i++){
 			if (bullets[y].checkCollision(*Entities[i]) && Entities[i]->checkCollision(bullets[y])){
 				if (bullets[y].visible && Entities[i]->visible){
 					Entities[i]->visible = false;
 					bullets[y].visible = false;
 				}
+			}
+			if (bullets[y].x > 2.0f || bullets[y].x < -2.0f || bullets[y].y >2.0f || bullets[y].y < -2.0f){
+				bullets[y].visible = false;
 			}
 		}
 
@@ -240,15 +243,15 @@ void App::FixedUpdate(){
 
 	keys = SDL_GetKeyboardState(NULL);
 	if (keys[SDL_SCANCODE_RIGHT]){
-		player.rotation -= 1.5;// *FIXED_TIMESTEP; Computers too laggy to run it as it's suppose to.
+		player.rotation -= 25*FIXED_TIMESTEP;// Computers too laggy to run it as it's suppose to.
 	}
 	if (keys[SDL_SCANCODE_LEFT]){
-		player.rotation += 1.5;// *FIXED_TIMESTEP; Computers too laggy to run it as it's suppose to.
+		player.rotation += 25*FIXED_TIMESTEP;// Computers too laggy to run it as it's suppose to.
 
 	}
 	if (keys[SDL_SCANCODE_UP]){
-		player.acceleration_y = sin(player.rotation / 180 * PI)*0.3f;// *FIXED_TIMESTEP; Computers too laggy to run it as it's suppose to.
-		player.acceleration_x = cos(player.rotation / 180 * PI)*0.3f;// *FIXED_TIMESTEP; Computers too laggy to run it as it's suppose to.
+		player.acceleration_y = sin(player.rotation / 180 * PI)*3.0f*FIXED_TIMESTEP;// Computers too laggy to run it as it's suppose to.
+		player.acceleration_x = cos(player.rotation / 180 * PI)*3.0f*FIXED_TIMESTEP;// Computers too laggy to run it as it's suppose to.
 	}
 
 
@@ -263,8 +266,8 @@ void App::shootbullet(){
 	bullets[bulletindex].x = player.x;
 	bullets[bulletindex].y = player.y;
 	bullets[bulletindex].rotation = player.rotation;
-	bullets[bulletindex].velocity_y = sin(bullets[bulletindex].rotation / 180 * PI)*0.01f;
-	bullets[bulletindex].velocity_x = cos(bullets[bulletindex].rotation / 180 * PI)*0.01f;
+	bullets[bulletindex].velocity_y = sin(bullets[bulletindex].rotation / 180 * PI)*0.5f;
+	bullets[bulletindex].velocity_x = cos(bullets[bulletindex].rotation / 180 * PI)*0.5f;
 	bullets[bulletindex].visible = true;
 	/*Entities.push_back(&bullets[bulletindex]);*/
 	bulletindex++;
