@@ -81,13 +81,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
-    <ClCompile Include="Bullets.cpp" />
     <ClCompile Include="MatrixEntities.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
-    <ClInclude Include="Bullets.h" />
     <ClInclude Include="MatrixEntities.h" />
   </ItemGroup>
   <ItemGroup>

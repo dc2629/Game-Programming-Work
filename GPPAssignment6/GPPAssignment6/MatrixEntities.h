@@ -73,6 +73,8 @@ public:
 	bool collideTop;
 	bool collideBot;
 
+	float timeAlive;
+
 	void buildMatrix();
 	void Render();
 

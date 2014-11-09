@@ -20,14 +20,18 @@ public:
 	void Update(float elapsed);
 
 	float lastFrameTicks;
-	float delay;
+	float delay, timer;
 
 	GLuint SpriteSheetTextureID;
 
 	vector<Entity*> Entities;
 	Entity player;
 	Entity Ast[10];
-	
+
+	Entity bullets[20];
+	void shootbullet();
+	bool shouldRemoveBullet(Entity bullet);
+	unsigned int bulletindex;
 
 	const Uint8* keys;
 	SDL_Window* displayWindow;

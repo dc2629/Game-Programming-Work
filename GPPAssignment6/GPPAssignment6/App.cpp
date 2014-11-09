@@ -87,6 +87,7 @@ void App::Init(){
 	timeLeftOver = 0.0f;
 	delay = 1.0f;
 	SpriteSheetTextureID = LoadTexture("SpaceShooterSprites.png");
+	bulletindex = 0;
 
 	player.textureID = SpriteSheetTextureID;
 	player.spriteCountX = 8;
@@ -117,7 +118,16 @@ void App::Init(){
 		Entities.push_back(&Ast[i]);
 	}
 
-	
+	for (int i = 0; i < 20; i++){
+		bullets[i].textureID = SpriteSheetTextureID;
+		bullets[i].spriteCountX = 8;
+		bullets[i].spriteCountY = 8;
+		bullets[i].index = 13;
+		bullets[i].visible = false;
+		bullets[i].height = .05;
+		bullets[i].width = .05;
+
+	}
 }
 
 void App::Render(){
@@ -127,88 +137,113 @@ void App::Render(){
 	for (int i = 0; i < Entities.size(); i++){
 		Entities[i]->Render();
 	}
+	for (int i = 0; i < 20; i++){
+		bullets[i].Render();
+	}
 
 	SDL_GL_SwapWindow(displayWindow);
 }
 
 void App::FixedUpdate(){
+
+	for (int y = 0; y < 20; y++){
+		bullets[y].x += bullets[y].velocity_x;// *FIXED_TIMESTEP; Computers too laggy to run it as it's suppose to.
+		bullets[y].y += bullets[y].velocity_y;// *FIXED_TIMESTEP; Computers too laggy to run it as it's suppose to.
+		for (int i = 1; i < Entities.size(); i++){
+			if (bullets[y].checkCollision(*Entities[i]) && Entities[i]->checkCollision(bullets[y])){
+				if (bullets[y].visible && Entities[i]->visible){
+					Entities[i]->visible = false;
+					bullets[y].visible = false;
+				}
+			}
+		}
+
+	}
+
 	for (int i = 0; i < Entities.size(); i++){
-		if (Entities[i]->x > 1.28){
-			Entities[i]->x = 1.28;
-			Entities[i]->velocity_x = -Entities[i]->velocity_x;
-		}
-		if (Entities[i]->x < -1.28){
-			Entities[i]->x = -1.28;
-			Entities[i]->velocity_x = -Entities[i]->velocity_x;
-		}
-		if (Entities[i]->y > .95){
-			Entities[i]->y = .95;
-			Entities[i]->velocity_y = -Entities[i]->velocity_y;
-		}
-		if (Entities[i]->y < -.95){
-			Entities[i]->y = -.95;
-			Entities[i]->velocity_y = -Entities[i]->velocity_y;
-		}
+		if (Entities[i]->visible){
+			if (Entities[i]->x > 1.28){
+				Entities[i]->x = 1.28;
+				Entities[i]->velocity_x = -Entities[i]->velocity_x;
+				Entities[i]->collideRight = true;
+			}
+			if (Entities[i]->x < -1.28){
+				Entities[i]->x = -1.28;
+				Entities[i]->velocity_x = -Entities[i]->velocity_x;
+				Entities[i]->collideLeft = true;
+			}
+			if (Entities[i]->y > .95){
+				Entities[i]->y = .95;
+				Entities[i]->velocity_y = -Entities[i]->velocity_y;
+				Entities[i]->collideTop = true;
+			}
+			if (Entities[i]->y < -.95){
+				Entities[i]->y = -.95;
+				Entities[i]->velocity_y = -Entities[i]->velocity_y;
+				Entities[i]->collideBot = true;
+			}
 
-		Entities[i]->velocity_y += Entities[i]->acceleration_y*FIXED_TIMESTEP;
-		Entities[i]->y += Entities[i]->velocity_y*FIXED_TIMESTEP;
+			Entities[i]->velocity_y += Entities[i]->acceleration_y*FIXED_TIMESTEP;
+			Entities[i]->y += Entities[i]->velocity_y*FIXED_TIMESTEP;
 
-		for (int y = 0; y < Entities.size(); y++){
-			if (i != y){
-				if (Entities[i]->checkCollision(*Entities[y]) && Entities[y]->checkCollision(*Entities[i])){
-					if (Entities[i]->y > Entities[y]->y){
-						Entities[i]->y += .02;
-						Entities[y]->y -= .02;
-						Entities[i]->collideBot = true;
-						Entities[y]->collideTop = true;
+			for (int y = 0; y < Entities.size(); y++){
+				if (i != y && Entities[y]->visible){
+					if (Entities[i]->checkCollision(*Entities[y]) && Entities[y]->checkCollision(*Entities[i])){
+						if (Entities[i]->y > Entities[y]->y){
+							Entities[i]->y += .02;
+							Entities[y]->y -= .02;
+							Entities[i]->collideBot = true;
+							Entities[y]->collideTop = true;
+						}
+						else{
+							Entities[y]->y += .02;
+							Entities[i]->y -= .02;
+							Entities[y]->collideBot = true;
+							Entities[i]->collideTop = true;
+						}
+						Entities[i]->velocity_y = -Entities[i]->velocity_y;
+						Entities[y]->velocity_y = -Entities[y]->velocity_y;
+
 					}
-					else{
-						Entities[y]->y += .02;
-						Entities[i]->y -= .02;
-						Entities[y]->collideBot = true;
-						Entities[i]->collideTop = true;
-					}
-					Entities[i]->velocity_y = -Entities[i]->velocity_y;
-					Entities[y]->velocity_y = -Entities[y]->velocity_y;
-
 				}
 			}
-		}
 
-		Entities[i]->velocity_x += Entities[i]->acceleration_x*FIXED_TIMESTEP;
-		Entities[i]->x += Entities[i]->velocity_x*FIXED_TIMESTEP;
+			Entities[i]->velocity_x += Entities[i]->acceleration_x*FIXED_TIMESTEP;
+			Entities[i]->x += Entities[i]->velocity_x*FIXED_TIMESTEP;
 
-		for (int y = 0; y < Entities.size(); y++){
-			if (i != y){
-				if (Entities[i]->checkCollision(*Entities[y]) && Entities[y]->checkCollision(*Entities[i])){
-					if (Entities[i]->x > Entities[y]->x){
-						Entities[i]->x += .02;
-						Entities[y]->x -= .02;
-						Entities[i]->collideLeft = true;
-						Entities[y]->collideRight = true;
+			for (int y = 0; y < Entities.size(); y++){
+				if (i != y && Entities[y]->visible){
+					if (Entities[i]->checkCollision(*Entities[y]) && Entities[y]->checkCollision(*Entities[i])){
+						if (Entities[i]->x > Entities[y]->x){
+							Entities[i]->x += .02;
+							Entities[y]->x -= .02;
+							Entities[i]->collideLeft = true;
+							Entities[y]->collideRight = true;
+						}
+						else{
+							Entities[y]->x += .02;
+							Entities[i]->x -= .02;
+							Entities[y]->collideLeft = true;
+							Entities[i]->collideRight = true;
+						}
+						Entities[i]->velocity_x = -Entities[i]->velocity_x;
+						Entities[y]->velocity_x = -Entities[y]->velocity_x;
 					}
-					else{
-						Entities[y]->x += .02;
-						Entities[i]->x -= .02;
-						Entities[y]->collideLeft = true;
-						Entities[i]->collideRight = true;
-					}
-					Entities[i]->velocity_x = -Entities[i]->velocity_x;
-					Entities[y]->velocity_x = -Entities[y]->velocity_x;
 				}
 			}
+			Entities[i]->acceleration_x = 0.0f;
+			Entities[i]->acceleration_y = 0.0f;
+			Entities[i]->resetCollisions();
 		}
-		Entities[i]->acceleration_x = 0.0f;
-		Entities[i]->acceleration_y = 0.0f;
-		Entities[i]->resetCollisions();
+
 	}
 
 	keys = SDL_GetKeyboardState(NULL);
 	if (keys[SDL_SCANCODE_RIGHT]){
-		player.rotation -= 2;// *FIXED_TIMESTEP; Computers too laggy to run it as it's suppose to.
+		player.rotation -= 1.5;// *FIXED_TIMESTEP; Computers too laggy to run it as it's suppose to.
 	}
 	if (keys[SDL_SCANCODE_LEFT]){
-		player.rotation += 2;// *FIXED_TIMESTEP; Computers too laggy to run it as it's suppose to.
+		player.rotation += 1.5;// *FIXED_TIMESTEP; Computers too laggy to run it as it's suppose to.
 
 	}
 	if (keys[SDL_SCANCODE_UP]){
@@ -224,14 +259,40 @@ void App::FixedUpdate(){
 	player.velocity_x = lerp(player.velocity_x, 0.0f, FIXED_TIMESTEP*0.5f);
 }
 
-void App::Update(float elapsed){
-	
-	delay -= elapsed;
-	if (keys[SDL_SCANCODE_SPACE]){
-		if (delay <= 0){
-			
-		}
+void App::shootbullet(){
+	bullets[bulletindex].x = player.x;
+	bullets[bulletindex].y = player.y;
+	bullets[bulletindex].rotation = player.rotation;
+	bullets[bulletindex].velocity_y = sin(bullets[bulletindex].rotation / 180 * PI)*0.01f;
+	bullets[bulletindex].velocity_x = cos(bullets[bulletindex].rotation / 180 * PI)*0.01f;
+	bullets[bulletindex].visible = true;
+	/*Entities.push_back(&bullets[bulletindex]);*/
+	bulletindex++;
+	if (bulletindex > 19){
+		bulletindex = 0;
+
 	}
+}
+
+//bool App::shouldRemoveBullet(Entity bullet) {
+//	if (bullet.timeAlive > 0.4) {
+//		return true;
+//	}
+//	else {
+//		return false;
+//	}
+//}
+
+void App::Update(float elapsed){
+	timer += elapsed - delay;
+	
+	
+	if (timer >= 1 && keys[SDL_SCANCODE_SPACE]){
+		shootbullet();
+		timer = 0.0;
+	}
+
+	delay = elapsed;
 }
 
 void App::UpdateandRender(){
@@ -247,7 +308,7 @@ void App::UpdateandRender(){
 	}
 	timeLeftOver = fixedElapsed;
 
-	//Update(elapsed);
+	Update(elapsed);
 	Render();
 }
 
