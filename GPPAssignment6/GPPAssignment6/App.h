@@ -1,4 +1,5 @@
 #pragma once
+#include"PerlinNoise.h"
 
 #define FIXED_TIMESTEP 0.016667
 #define MAX_TIMESTEP 6
@@ -39,4 +40,16 @@ public:
 	float timeLeftOver;
 
 	void checkCollision();
+
+	float perlinValue;
+	float screenShakeValue;
+	float screenShakeSpeed;
+	float screenShakeIntensity;
+
+
+	float animationTime;
+	float animationStart;
+	float animationEnd;
+
+
 };

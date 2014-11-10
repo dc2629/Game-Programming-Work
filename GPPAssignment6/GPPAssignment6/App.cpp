@@ -4,6 +4,50 @@ float lerp(float v0, float v1, float t) {
 	return (1.0f - t)*v0 + t*v1;
 }
 
+float mapValue(float value, float srcMin, float srcMax, float dstMin, float dstMax) {
+	float retVal = dstMin + ((value - srcMin) / (srcMax - srcMin) * (dstMax - dstMin));
+	if (retVal < dstMin) {
+		retVal = dstMin;
+	}
+	if (retVal > dstMax) {
+		retVal = dstMax;
+	}
+	return retVal;
+}
+
+float easeOutElastic(float from, float to, float time) {
+	float p = 0.3f;
+	float s = p / 4.0f;
+	float diff = (to - from);
+	return from + diff + (diff*pow(2.0f, -10.0f*time) * sin((time - s)*(2 * PI) / p));
+}
+
+float easeIn(float from, float to, float time) {
+	float tVal = time*time*time*time*time;
+	return (1.0f - tVal)*from + tVal*to;
+}
+
+float easeOut(float from, float to, float time) {
+	float oneMinusT = 1.0f - time;
+	float tVal = 1.0f - (oneMinusT * oneMinusT * oneMinusT *
+		oneMinusT * oneMinusT);
+	return (1.0f - tVal)*from + tVal*to;
+}
+
+float easeInOut(float from, float to, float time) {
+	float tVal;
+	if (time > 0.5) {
+		float oneMinusT = 1.0f - ((0.5f - time)*-2.0f);
+		tVal = 1.0f - ((oneMinusT * oneMinusT * oneMinusT * oneMinusT *
+			oneMinusT) * 0.5f);
+	}
+	else {
+		time *= 2.0;
+		tVal = (time*time*time*time*time) / 2.0;
+	}
+	return (1.0f - tVal)*from + tVal*to;
+}
+
 void App::checkCollision(){
 
 	for (int i = 0; i < Entities.size(); i++){
@@ -88,6 +132,9 @@ void App::Init(){
 	delay = 1.0f;
 	SpriteSheetTextureID = LoadTexture("SpaceShooterSprites.png");
 	bulletindex = 0;
+	screenShakeSpeed = 1.5f;
+	screenShakeIntensity = .01f;
+
 
 	player.textureID = SpriteSheetTextureID;
 	player.spriteCountX = 8;
@@ -157,7 +204,8 @@ void App::FixedUpdate(){
 				}
 			}
 		}
-
+		if (bullets[y].x > 2.0f || bullets[y].y > 2.0f || bullets[y].y < -2.0f || bullets[y].x < -2.0f)
+			bullets[y].visible = false;
 	}
 
 	for (int i = 0; i < Entities.size(); i++){
@@ -285,14 +333,24 @@ void App::shootbullet(){
 
 void App::Update(float elapsed){
 	timer += elapsed - delay;
-	
-	
+
+
 	if (timer >= 1 && keys[SDL_SCANCODE_SPACE]){
 		shootbullet();
 		timer = 0.0;
 	}
-
 	delay = elapsed;
+	//animationStart = 0.0f;
+	//animationEnd = 3000.0f;
+	//if (animationTime < 3050.0f){
+	//	animationTime += elapsed;
+	//	float animationValue = mapValue(animationTime, animationStart, animationEnd, 0.0f, 1.0f);
+	//	player.x = easeOut(0.0, 1.0, animationValue) - 1;
+	//}
+
+	//perlinValue += elapsed;
+	//glTranslatef(noise1(perlinValue), noise1(perlinValue+10.0f), 0.0);
+
 }
 
 void App::UpdateandRender(){
@@ -307,8 +365,9 @@ void App::UpdateandRender(){
 		FixedUpdate();
 	}
 	timeLeftOver = fixedElapsed;
-
 	Update(elapsed);
+
 	Render();
+
 }
 
