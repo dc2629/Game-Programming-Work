@@ -57,7 +57,7 @@
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -82,12 +82,15 @@
   <ItemGroup>
     <ClCompile Include="App.cpp" />
     <ClCompile Include="MatrixEntities.cpp" />
+    <ClCompile Include="ParticleSystem.cpp" />
     <ClCompile Include="PerlinNoise.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
+    <ClInclude Include="Color.h" />
     <ClInclude Include="MatrixEntities.h" />
+    <ClInclude Include="ParticleSystem.h" />
     <ClInclude Include="PerlinNoise.h" />
   </ItemGroup>
   <ItemGroup>

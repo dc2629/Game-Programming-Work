@@ -53,6 +53,9 @@ public:
 	float width;
 	float height;
 
+	float set_x;
+	float set_y;
+
 	float scale_x;
 	float scale_y;
 	float rotation;

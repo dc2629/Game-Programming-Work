@@ -61,6 +61,17 @@ void App::checkCollision(){
 	}
 };
 
+void App::screenShake(){
+	screenShakeValue += FIXED_TIMESTEP;
+	cout << screenShakeValue << endl;
+	glTranslatef(0.0f, sin(screenShakeValue * 25)* 0.05, 0.0f);
+	if (screenShakeValue > 1) {
+		for (int i = 0; i < 20; i++)
+			bullets[i].collideBot = false;
+		screenShakeValue = 0.0f;
+	}
+}
+
 GLuint LoadTexture(const char* image_path) {
 	SDL_Surface *surface = IMG_Load(image_path);
 	GLuint textureID;
@@ -129,19 +140,20 @@ void App::Init(){
 	glOrtho(-1.33, 1.33, -1, 1, -1, 1);//The ratio of resolutions
 
 	timeLeftOver = 0.0f;
-	delay = 1.0f;
+	delay = 0.0f;
 	SpriteSheetTextureID = LoadTexture("SpaceShooterSprites.png");
 	bulletindex = 0;
-	screenShakeSpeed = 1.5f;
-	screenShakeIntensity = .01f;
-
+	animationTime = 0;
+	fadeframes = 1.0;
+	elapsed = 0;
+	screenShakeValue = 0.0f;
 
 	player.textureID = SpriteSheetTextureID;
 	player.spriteCountX = 8;
 	player.spriteCountY = 8;
 	player.index = 12;
-	player.x = .5;
-	player.y = .2;
+	player.set_x = .5;
+	player.set_y = .2;
 	player.width = .1;
 	player.height = .1;
 	player.rotation = 0;
@@ -155,8 +167,8 @@ void App::Init(){
 		float x = .1 + RANDOM_NUMBER / 10;
 		Ast[i].height = x;
 		Ast[i].width = x;
-		Ast[i].x = RANDOM_NUMBER * pow(-1, i);
-		Ast[i].y = RANDOM_NUMBER * pow(-1, i);
+		Ast[i].set_x = RANDOM_NUMBER * pow(-1, i);
+		Ast[i].set_y = RANDOM_NUMBER * pow(-1, i);
 		//myglTranslate(.3, .2, Ast[i]);
 		Ast[i].rotation = RANDOM_NUMBER * 360;
 
@@ -177,9 +189,25 @@ void App::Init(){
 	}
 }
 
+void App::fadeIn() {
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	GLfloat quad[] = { -2, 2, -2, -2, 2, -2, 2, 2 };
+	GLfloat color[] = { 0.0, 0.0, 0.0, fadeframes, 0.0, 0.0, 0.0, fadeframes, 0.0, 0.0, 0.0, fadeframes, 0.0, 0.0, 0.0, fadeframes };
+
+	glDisable(GL_TEXTURE_2D);
+	glEnableClientState(GL_COLOR_ARRAY);
+	glColorPointer(4, GL_FLOAT, 0, color);
+	glVertexPointer(2, GL_FLOAT, 0, quad);
+	glDrawArrays(GL_QUADS, 0, 4);
+	glDisableClientState(GL_COLOR_ARRAY);
+}
+
 void App::Render(){
 	glClearColor(55.0f / 255.0f, 84.0f / 255.0f, 229.0f / 255.0f, 1.0f);//Determines default coloring
 	glClear(GL_COLOR_BUFFER_BIT);//Makes background default color
+
+	fadeIn();
 
 	for (int i = 0; i < Entities.size(); i++){
 		Entities[i]->Render();
@@ -187,6 +215,15 @@ void App::Render(){
 	for (int i = 0; i < 20; i++){
 		bullets[i].Render();
 	}
+
+	
+	glLoadIdentity();
+	for (int y = 0; y < 20; y++){
+		if (bullets[y].collideBot)
+			screenShake();
+	}
+
+
 
 	SDL_GL_SwapWindow(displayWindow);
 }
@@ -200,6 +237,7 @@ void App::FixedUpdate(){
 			if (bullets[y].checkCollision(*Entities[i]) && Entities[i]->checkCollision(bullets[y])){
 				if (bullets[y].visible && Entities[i]->visible){
 					Entities[i]->visible = false;
+					bullets[y].collideBot = true;
 					bullets[y].visible = false;
 				}
 			}
@@ -209,6 +247,8 @@ void App::FixedUpdate(){
 		}
 		if (bullets[y].x > 2.0f || bullets[y].y > 2.0f || bullets[y].y < -2.0f || bullets[y].x < -2.0f)
 			bullets[y].visible = false;
+
+	
 	}
 
 	for (int i = 0; i < Entities.size(); i++){
@@ -334,15 +374,15 @@ void App::shootbullet(){
 //	}
 //}
 
-void App::Update(float elapsed){
+void App::Update(){
 	timer += elapsed - delay;
+	
 
-
-	if (timer >= 1 && keys[SDL_SCANCODE_SPACE]){
+	if (timer >= .5 && keys[SDL_SCANCODE_SPACE]){
 		shootbullet();
 		timer = 0.0;
 	}
-	delay = elapsed;
+	
 	//animationStart = 0.0f;
 	//animationEnd = 3000.0f;
 	//if (animationTime < 3050.0f){
@@ -350,15 +390,40 @@ void App::Update(float elapsed){
 	//	float animationValue = mapValue(animationTime, animationStart, animationEnd, 0.0f, 1.0f);
 	//	player.x = easeOut(0.0, 1.0, animationValue) - 1;
 	//}
+	animationTime = elapsed;//Why is it that everyone uses animationTime+=elapsed?!?!? I tried doing that but the time doesnt map correctly!!!
+	float animationValue = mapValue(animationTime, 3, 5, 0.0f, 1.0);
+	float animationValue1 = mapValue(animationTime, 0, 2, 0.0, 1.0);
+	fadeframes = lerp(1, 0, animationValue1);
+	
+	if (elapsed <= 5){
+		for (int i = 0; i < Entities.size(); i++){
+			/*cout << animationValue<<" "<<animationTime <<" "<<elapsed<< endl;*/
+			if (i % 4 == 0){
+				Entities[i]->x = Entities[i]->set_x;
+				Entities[i]->y = easeOutElastic(1.5, Entities[i]->set_y, animationValue);
+			}
+			else if(i%4 == 1){
+				Entities[i]->x = Entities[i]->set_x;
+				Entities[i]->y = easeOutElastic(-1.5, Entities[i]->set_y, animationValue);
+			}
+			else if (i % 4 == 2){
+				Entities[i]->y = Entities[i]->set_y;
+				Entities[i]->x = easeOutElastic(-1.5, Entities[i]->set_x, animationValue);
+			}
+			else if (i % 4 == 3){
+				Entities[i]->y = Entities[i]->set_y;
+				Entities[i]->x = easeOutElastic(1.5, Entities[i]->set_x, animationValue);
+			}
+		}
+	}
 
-	//perlinValue += elapsed;
-	//glTranslatef(noise1(perlinValue), noise1(perlinValue+10.0f), 0.0);
+	delay = elapsed;
 
 }
 
 void App::UpdateandRender(){
 	float ticks = (float)SDL_GetTicks() / 1000.0f;
-	float elapsed = ticks - lastFrameTicks;
+	elapsed = ticks - lastFrameTicks;
 	float fixedElapsed = elapsed + timeLeftOver;
 	if (fixedElapsed > FIXED_TIMESTEP * MAX_TIMESTEP) {
 		fixedElapsed = FIXED_TIMESTEP * MAX_TIMESTEP;
@@ -367,8 +432,9 @@ void App::UpdateandRender(){
 		fixedElapsed -= FIXED_TIMESTEP;
 		FixedUpdate();
 	}
+
 	timeLeftOver = fixedElapsed;
-	Update(elapsed);
+	Update();
 
 	Render();
 

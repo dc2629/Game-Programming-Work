@@ -18,10 +18,10 @@ public:
 	void UpdateandRender();
 	void FixedUpdate();
 	void Render();
-	void Update(float elapsed);
+	void Update();
 
 	float lastFrameTicks;
-	float delay, timer;
+	float elapsed, delay, timer;
 
 	GLuint SpriteSheetTextureID;
 
@@ -40,12 +40,12 @@ public:
 	float timeLeftOver;
 
 	void checkCollision();
+	void fadeIn();
+	float fadeframes;
 
-	float perlinValue;
+	//float perlinValue;
+	void screenShake();
 	float screenShakeValue;
-	float screenShakeSpeed;
-	float screenShakeIntensity;
-
 
 	float animationTime;
 	float animationStart;
