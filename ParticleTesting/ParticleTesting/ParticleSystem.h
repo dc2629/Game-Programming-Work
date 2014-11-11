@@ -2,19 +2,24 @@
 #include"MatrixEntities.h"
 #include"Color.h"
 
+#define RANDOM_NUMBER ((float)rand()/(float)RAND_MAX)
+
 using namespace std;
 
 class Particle {
 public:
 	Vector position;
 	Vector velocity;
+	Vector velocityDeviation;
 	float lifetime;
-	float sizeDeviation;
+	float sizeDeviation; 
+
+	Color colorDeviation;
 };
 
 class ParticleEmitter {
 public:
-	ParticleEmitter(unsigned int particleCount) :maxLifetime(2.5f), startSize(0.1f), endSize(0.0f), particles(vector<Particle>(particleCount)){};
+	ParticleEmitter(unsigned int particleCount); 
 	ParticleEmitter();
 	~ParticleEmitter();
 
@@ -28,9 +33,10 @@ public:
 	Vector velocity;
 	Vector velocityDeviation;
 
-	float startSize;
-	float endSize;
-	float sizeDeviation;
+	Color startColor;
+	Color endColor;
+	Color colorDeviation;
 
 	vector<Particle> particles;
 };
+
