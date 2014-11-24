@@ -48,17 +48,17 @@ ParticleEmitter::ParticleEmitter(unsigned int particleCount){
 	position.z = 0;
 
 	velocity.x = 0;
-	velocity.y = .5;
-	velocityDeviation.x = .5;
+	velocity.y = 1;
+	velocityDeviation.x = 2;
 	velocityDeviation.y = .5;
 
-	startColor.r = 0.0;
-	startColor.g = 0.0;
-	startColor.b = 0.0;
+	startColor.r = 1.0;
+	startColor.g = 1.0;
+	startColor.b = 1.0;
 	startColor.a = 1.0;
 	endColor.r =1.0;
 	endColor.g = .5;
-	endColor.b = 0;
+	endColor.b = .5;
 	endColor.a = 0.0;
 	colorDeviation.r = 1;
 	colorDeviation.g = .5;

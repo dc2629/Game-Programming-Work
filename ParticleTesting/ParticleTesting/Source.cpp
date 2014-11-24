@@ -61,7 +61,7 @@ void CleanUp(){
 int main(int argc, char *argv[]){
 	SDL_Event EVENT;
 	Setup();
-	ParticleEmitter p(500);
+	ParticleEmitter p(200);
 	float lastFrameTicks = 0.0f;
 	while (!ProcessEvents(EVENT)) {
 		float ticks = (float)SDL_GetTicks() / 1000.0f;
