@@ -25,8 +25,11 @@ public:
 	GLuint SpriteSheetTextureID;
 
 	vector<Entity*> Entities;
+	vector<Entity*> floor;
 	Entity player;
 	Entity Ast[40];
+
+	float gravity_y;
 
 	Entity bullets[20];
 	void shootbullet();

@@ -203,10 +203,10 @@ void Entity::Draw() {
 		float spriteWidth = 1.0f / (float)spriteCountX;
 		float spriteHeight = 1.0f / (float)spriteCountY;
 
-		GLfloat quadUVs[] = { u + 0.002f, v,
-			u + 0.002f, v + (spriteHeight),
-			u + spriteWidth - 0.002f, v + (spriteHeight),
-			u + spriteWidth - 0.002f, v
+		GLfloat quadUVs[] = { u + 0.002f, v + 0.002f,
+			u + 0.002f, v + (spriteHeight)-0.002f,
+			u + spriteWidth - 0.002f, v + (spriteHeight)-0.002f,
+			u + spriteWidth - 0.002f, v + 0.002f
 		};
 
 		GLfloat quad[] = { -width / 2, height / 2, -width / 2, -height / 2, width / 2, -height / 2, width / 2, height / 2 };//Defines a quad to place the image. REMEMBER COUNTER CLOCKWISE LISTING OF VERTICES

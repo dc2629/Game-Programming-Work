@@ -63,7 +63,6 @@ void App::checkCollision(){
 
 void App::screenShake(){
 	screenShakeValue += FIXED_TIMESTEP;
-	cout << screenShakeValue << endl;
 	glTranslatef(0.0f, sin(screenShakeValue * 25)* 0.05, 0.0f);
 	if (screenShakeValue > 1) {
 		for (int i = 0; i < 20; i++)
@@ -138,13 +137,14 @@ void App::Init(){
 	fadeframes = 1.0;
 	elapsed = 0;
 	screenShakeValue = 0.0f;
+	gravity_y = -.5;
 
 	player.textureID = SpriteSheetTextureID;
 	player.spriteCountX = 16;
 	player.spriteCountY = 8;
 	player.index = 80;
-	player.set_x = .5;
-	player.set_y = .2;
+	player.x = -.85f;
+	player.y = .2;
 	player.width = .1;
 	player.height = .1;
 	player.rotation = 0;
@@ -158,13 +158,11 @@ void App::Init(){
 		Ast[i].height = .1;
 		Ast[i].width = .1;
 		Ast[i].x = ((float)i) / 9.9 - 1.67;
-		cout << Ast[i].x << endl;
 		Ast[i].y = -.95;
 		Ast[i].rotation = 0;
-
-		Ast[i].velocity_x = 0;
+		Ast[i].velocity_x = -0.01;
 		Ast[i].velocity_y = 0;
-		Entities.push_back(&Ast[i]);
+		floor.push_back(&Ast[i]);
 	}
 
 
@@ -192,70 +190,25 @@ void App::Render(){
 	for (int i = 0; i < Entities.size(); i++){
 		Entities[i]->Render();
 	}
-
+	for (int i = 0; i < floor.size(); i++){
+		floor[i]->Render();
+	}
 
 	SDL_GL_SwapWindow(displayWindow);
 }
 
 void App::FixedUpdate(){
-
-	for (int i = 0; i < Entities.size(); i++){
-		if (Entities[i]->visible){
-
-			Entities[i]->velocity_y += Entities[i]->acceleration_y*FIXED_TIMESTEP;
-			Entities[i]->y += Entities[i]->velocity_y*FIXED_TIMESTEP;
-
-			for (int y = 0; y < Entities.size(); y++){
-				if (i != y && Entities[y]->visible){
-					if (Entities[i]->checkCollision(*Entities[y]) && Entities[y]->checkCollision(*Entities[i])){
-						if (Entities[i]->y > Entities[y]->y){
-							Entities[i]->y += .02;
-							Entities[y]->y -= .02;
-							Entities[i]->collideBot = true;
-							Entities[y]->collideTop = true;
-						}
-						else{
-							Entities[y]->y += .02;
-							Entities[i]->y -= .02;
-							Entities[y]->collideBot = true;
-							Entities[i]->collideTop = true;
-						}
-						Entities[i]->velocity_y = -Entities[i]->velocity_y;
-						Entities[y]->velocity_y = -Entities[y]->velocity_y;
-
-					}
-				}
-			}
-
-			Entities[i]->velocity_x += Entities[i]->acceleration_x*FIXED_TIMESTEP;
-			Entities[i]->x += Entities[i]->velocity_x*FIXED_TIMESTEP;
-
-			for (int y = 0; y < Entities.size(); y++){
-				if (i != y && Entities[y]->visible){
-					if (Entities[i]->checkCollision(*Entities[y]) && Entities[y]->checkCollision(*Entities[i])){
-						if (Entities[i]->x > Entities[y]->x){
-							Entities[i]->x += .02;
-							Entities[y]->x -= .02;
-							Entities[i]->collideLeft = true;
-							Entities[y]->collideRight = true;
-						}
-						else{
-							Entities[y]->x += .02;
-							Entities[i]->x -= .02;
-							Entities[y]->collideLeft = true;
-							Entities[i]->collideRight = true;
-						}
-						Entities[i]->velocity_x = -Entities[i]->velocity_x;
-						Entities[y]->velocity_x = -Entities[y]->velocity_x;
-					}
-				}
-			}
-			Entities[i]->acceleration_x = 0.0f;
-			Entities[i]->acceleration_y = 0.0f;
-			Entities[i]->resetCollisions();
+	for (int i = 0; i < floor.size(); i++){
+		if (floor[i]->x < -2){
+			floor[i]->x = 2;
 		}
-
+		floor[i]->x += floor[i]->velocity_x*FIXED_TIMESTEP;
 	}
+
+	//player.velocity_y += player.acceleration_y*FIXED_TIMESTEP;
+	//player.velocity_y += gravity_y*FIXED_TIMESTEP;
+	//player.y += player.velocity_y*FIXED_TIMESTEP;
+
 
 }
 
