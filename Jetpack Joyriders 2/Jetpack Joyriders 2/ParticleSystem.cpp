@@ -57,11 +57,11 @@ ParticleEmitter::ParticleEmitter(unsigned int particleCount){
 	velocityDeviation.y = .25;
 
 	startColor.r = 1.0;
-	startColor.g = 0.0;
+	startColor.g = 1.0;
 	startColor.b = 0.0;
 	startColor.a = 1.0;
 	endColor.r = 1.0;
-	endColor.g = .5;
+	endColor.g = 0;
 	endColor.b = 0.0;
 	endColor.a = 1.0;
 	colorDeviation.r = 1;

@@ -202,6 +202,13 @@ void App::Init(){
 		saIndex[i] = i + 24;
 	}
 	snakescurrentindex = 0;
+	//Bullets
+	//for (int i = 0; i < 8; i++){
+	//	/*bullets[i].*/
+	//}
+
+
+
 
 }
 
@@ -280,8 +287,9 @@ void App::FixedUpdate(){
 }
 
 void App::Update(){
-	timer += elapsed - delay;
-	timer2 += elapsed - delay;
+	actualElapsed = elapsed - delay;
+	timer += actualElapsed;
+	timer2 += actualElapsed;
 	if (player.collideBot){
 		if (timer > .2) {
 			currentindex++;
@@ -299,7 +307,7 @@ void App::Update(){
 	}
 	for (int i = 0; i < 6; i++){
 		if ((Snakes[i].x-player.x)<.6){
-			Snakes[i].velocity_x = -.003;
+			Snakes[i].velocity_x = -.003 - (0.001*actualElapsed);
 			Snakes[i].scale_x = 1;
 		}
 		if (timer2 > .2) {
@@ -312,7 +320,7 @@ void App::Update(){
 		Snakes[i].index = saIndex[snakescurrentindex];
 
 		if (Snakes[i].x < -1.5 || (Snakes[i].y < -1.2)){
-			Snakes[i].x = 2+RANDOM_NUMBER;
+			Snakes[i].x = 4+RANDOM_NUMBER;
 			Snakes[i].y = -.825f;
 			Snakes[i].rotation = 0;
 			Snakes[i].velocity_y = .05;
@@ -335,9 +343,12 @@ void App::Update(){
 		}
 	}
 
-
-
-
+	for (int i = 1; i < Entities.size(); i++){
+		Entities[i]->velocity_x += (-.001*actualElapsed);
+	}
+	for (int i = 0; i < floor.size(); i++){
+		floor[i]->velocity_x += (-.0005*actualElapsed);
+	}
 	playerParticles.Update(timeLeftOver);
 
 	delay = elapsed;

@@ -21,7 +21,7 @@ public:
 	void Update();
 
 	float lastFrameTicks;
-	float elapsed, delay, timer,timer2;
+	float elapsed, delay, actualElapsed, timer, timer2;
 
 	GLuint SpriteSheetTextureID;
 
@@ -43,9 +43,8 @@ public:
 
 	float gravity_y;
 
-	Entity bullets[20];
-	void shootbullet();
-	bool shouldRemoveBullet(Entity bullet);
+	Entity bulletindicators[8];
+	Entity bullets[8];
 	unsigned int bulletindex;
 
 	const Uint8* keys;
