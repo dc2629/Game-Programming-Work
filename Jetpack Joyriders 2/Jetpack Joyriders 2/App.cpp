@@ -97,20 +97,20 @@ bool App::ProcessEvents(){
 		if (EVENT.type == SDL_QUIT || EVENT.type == SDL_WINDOWEVENT_CLOSE) {
 			return(true);
 		}		////HOW TO DEBUG EVERYTHING !
-		else if (EVENT.type == SDL_MOUSEMOTION){
-			float unitX = (((float)EVENT.motion.x / 800.0f)*2.66f) - 1.33f;
-			float unitY = (((float)(600 - EVENT.motion.y) / 600.0f) * 2.0f) - 1.0f;
-			player.x = unitX;
-			player.y = unitY;
-			/*myglTranslate(unitX, unitY, player);*/
-		}
-		else if (EVENT.type == SDL_MOUSEBUTTONDOWN){
-			//worldToTileCoordinates(player.x, player.y, player.gridX, player.gridY);
-			checkCollision();
+		//else if (EVENT.type == SDL_MOUSEMOTION){
+		//	float unitX = (((float)EVENT.motion.x / 800.0f)*2.66f) - 1.33f;
+		//	float unitY = (((float)(600 - EVENT.motion.y) / 600.0f) * 2.0f) - 1.0f;
+		//	player.x = unitX;
+		//	player.y = unitY;
+		//	/*myglTranslate(unitX, unitY, player);*/
+		//}
+		//else if (EVENT.type == SDL_MOUSEBUTTONDOWN){
+		//	//worldToTileCoordinates(player.x, player.y, player.gridX, player.gridY);
+		//	checkCollision();
 
-			cout << "This is x value: " << player.x << " and y value: " << player.y << endl;
-			/*cout << "This is the gridX value: " << player.gridX << "and the gridY value: " << player.gridY << endl;*/
-		}
+		//	cout << "This is x value: " << player.x << " and y value: " << player.y << endl;
+		//	/*cout << "This is the gridX value: " << player.gridX << "and the gridY value: " << player.gridY << endl;*/
+		//}
 
 	}
 	return false;
@@ -137,16 +137,16 @@ void App::Init(){
 	fadeframes = 1.0;
 	elapsed = 0;
 	screenShakeValue = 0.0f;
-	gravity_y = -.5;
+	gravity_y = -.0075f;
 
-	player.textureID = SpriteSheetTextureID;
-	player.spriteCountX = 16;
-	player.spriteCountY = 8;
-	player.index = 80;
+	player.textureID = LoadTexture("characters_3.png");
+	player.spriteCountX = 8;
+	player.spriteCountY = 4;
+	player.index = 8;
 	player.x = -.85f;
-	player.y = .2;
-	player.width = .1;
-	player.height = .1;
+	player.y = -.6;
+	player.width = .2;
+	player.height = .2;
 	player.rotation = 0;
 	Entities.push_back(&player);
 
@@ -160,12 +160,21 @@ void App::Init(){
 		Ast[i].x = ((float)i) / 9.9 - 1.67;
 		Ast[i].y = -.95;
 		Ast[i].rotation = 0;
-		Ast[i].velocity_x = -0.01;
+		Ast[i].velocity_x = -0.005;
 		Ast[i].velocity_y = 0;
 		floor.push_back(&Ast[i]);
 	}
 
+	for (int i = 0; i < 4; i++){
+		paIndex1[i] = i + 8;
+	}
 
+	numFrames = 4;
+	currentindex = 0;
+	
+	ParticleEmitter temp(25);
+	playerParticles = temp;
+	playerParticles.position.x = -.85f;
 }
 
 void App::fadeIn() {
@@ -194,26 +203,65 @@ void App::Render(){
 		floor[i]->Render();
 	}
 
+	if (!player.collideBot){
+		playerParticles.Render();
+	}
+
 	SDL_GL_SwapWindow(displayWindow);
 }
 
 void App::FixedUpdate(){
 	for (int i = 0; i < floor.size(); i++){
 		if (floor[i]->x < -2){
-			floor[i]->x = 2;
+			floor[i]->x = 2.04;
 		}
 		floor[i]->x += floor[i]->velocity_x*FIXED_TIMESTEP;
 	}
 
-	//player.velocity_y += player.acceleration_y*FIXED_TIMESTEP;
-	//player.velocity_y += gravity_y*FIXED_TIMESTEP;
-	//player.y += player.velocity_y*FIXED_TIMESTEP;
+	player.velocity_y += player.acceleration_y*FIXED_TIMESTEP;
+	player.velocity_y += gravity_y*FIXED_TIMESTEP;
+	player.y += player.velocity_y*FIXED_TIMESTEP;
+	player.acceleration_y = 0;
+	if (player.y < -.8){
+		player.y = -.8;
+		player.collideBot = true;
+		player.velocity_y = 0;
+	}
+	keys = SDL_GetKeyboardState(NULL);
+
+	if (keys[SDL_SCANCODE_UP]){
+		player.acceleration_y =0.75f*FIXED_TIMESTEP;// Computers too laggy to run it as it's suppose to.
+	}
 
 
+	
+
+
+	player.velocity_y = lerp(player.velocity_y, 0.0f, FIXED_TIMESTEP*0.5f);
 }
 
 void App::Update(){
+	timer += elapsed - delay;
 
+	if (player.collideBot){
+		if (timer > .2) {
+			currentindex++;
+			timer = 0.0;
+			if (currentindex > numFrames - 1) {
+				currentindex = 0;
+			}
+		}
+		player.index = paIndex1[currentindex];
+	}
+	else{
+		player.index = 13;
+		playerParticles.position.y = player.y - .1f;
+
+	}
+		
+	playerParticles.Update(timeLeftOver);
+
+	delay = elapsed;
 }
 
 void App::UpdateandRender(){
@@ -229,9 +277,11 @@ void App::UpdateandRender(){
 	}
 
 	timeLeftOver = fixedElapsed;
+
 	Update();
 
 	Render();
 
+	player.resetCollisions();
 }
 

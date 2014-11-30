@@ -24,6 +24,9 @@
     <ClCompile Include="App.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ParticleSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MatrixEntities.h">
@@ -32,15 +35,15 @@
     <ClInclude Include="App.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ParticleSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Color.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="SpaceShooterSprites.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="villagess.png">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="SpriteSheet.png">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

@@ -1,9 +1,10 @@
 #pragma once
+#include"MatrixEntities.h"
+#include"ParticleSystem.h"
 
 #define FIXED_TIMESTEP 0.016667
 #define MAX_TIMESTEP 6
-#pragma once
-#include"MatrixEntities.h"
+
 
 class App{
 public:
@@ -27,6 +28,13 @@ public:
 	vector<Entity*> Entities;
 	vector<Entity*> floor;
 	Entity player;
+
+	int paIndex1[4];
+	int numFrames;
+	int currentindex;
+
+	ParticleEmitter playerParticles;
+
 	Entity Ast[40];
 
 	float gravity_y;

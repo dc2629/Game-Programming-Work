@@ -1,6 +1,6 @@
 #include"ParticleSystem.h"
 
-float lerp(float v0, float v1, float t) {
+float lerp1(float v0, float v1, float t) {
 	return (1.0f - t)*v0 + t*v1;
 }
 
@@ -24,10 +24,10 @@ void ParticleEmitter::Render(){
 	vector<float> particleColors;
 	for (unsigned int i = 0; i < particles.size(); i++) {
 		float m = (particles[i].lifetime / maxLifetime);
-		particleColors.push_back(lerp(startColor.r, endColor.r, m) + particles[i].colorDeviation.r);
-		particleColors.push_back(lerp(startColor.g, endColor.g, m) + particles[i].colorDeviation.g);
-		particleColors.push_back(lerp(startColor.b, endColor.b, m) + particles[i].colorDeviation.b);
-		particleColors.push_back(lerp(startColor.a, endColor.a, m) + particles[i].colorDeviation.a);
+		particleColors.push_back(lerp1(startColor.r, endColor.r, m) + particles[i].colorDeviation.r);
+		particleColors.push_back(lerp1(startColor.g, endColor.g, m) + particles[i].colorDeviation.g);
+		particleColors.push_back(lerp1(startColor.b, endColor.b, m) + particles[i].colorDeviation.b);
+		particleColors.push_back(lerp1(startColor.a, endColor.a, m) + particles[i].colorDeviation.a);
 	}
 	glColorPointer(4, GL_FLOAT, 0, particleColors.data());
 	glEnableClientState(GL_COLOR_ARRAY);
@@ -43,9 +43,13 @@ ParticleEmitter::ParticleEmitter(){};
 
 ParticleEmitter::ParticleEmitter(unsigned int particleCount){
 	maxLifetime = 2;
-	position.x = 0;
-	position.y = 0;
+
 	position.z = 0;
+
+	velocity.x = 0;
+	velocity.y = -1;
+	velocityDeviation.x = 2;
+	velocityDeviation.y = .5;
 
 	velocity.x = 0;
 	velocity.y = -.5;
@@ -56,13 +60,13 @@ ParticleEmitter::ParticleEmitter(unsigned int particleCount){
 	startColor.g = 0.0;
 	startColor.b = 0.0;
 	startColor.a = 1.0;
-	endColor.r =1.0;
+	endColor.r = 1.0;
 	endColor.g = .5;
-	endColor.b = .5;
-	endColor.a = 0.0;
+	endColor.b = 0.0;
+	endColor.a = 1.0;
 	colorDeviation.r = 1;
 	colorDeviation.g = 1;
-	colorDeviation.b = 1;
+	colorDeviation.b = 0;
 	colorDeviation.a = 0;
 
 	gravity.x = 0;
