@@ -311,8 +311,11 @@ void App::Update(){
 		}
 		Snakes[i].index = saIndex[snakescurrentindex];
 
-		if (Snakes[i].x < -1.5 || Snakes[i].y < -1.2){
+		if (Snakes[i].x < -1.5 || (Snakes[i].y < -1.2)){
 			Snakes[i].x = 2+RANDOM_NUMBER;
+			Snakes[i].y = -.825f;
+			Snakes[i].rotation = 0;
+			Snakes[i].velocity_y = .05;
 			if (RANDOM_NUMBER * 2 > 1){
 				Snakes[i].scale_x = -1;
 				Snakes[i].velocity_x = -0.005 + (-.003*RANDOM_NUMBER);
