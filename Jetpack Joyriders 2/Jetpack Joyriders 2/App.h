@@ -21,7 +21,7 @@ public:
 	void Update();
 
 	float lastFrameTicks;
-	float elapsed, delay, timer;
+	float elapsed, delay, timer,timer2;
 
 	GLuint SpriteSheetTextureID;
 
@@ -36,6 +36,10 @@ public:
 	ParticleEmitter playerParticles;
 
 	Entity Ast[40];
+	Entity Snakes[4];
+
+	int saIndex[4];
+	int snakescurrentindex;
 
 	float gravity_y;
 

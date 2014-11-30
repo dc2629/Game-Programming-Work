@@ -131,6 +131,8 @@ void App::Init(){
 	timeLeftOver = 0.0f;
 	delay = 0.0f;
 	SpriteSheetTextureID = LoadTexture("SpriteSheet.png");
+	timer = 0.0f;
+	timer2 = 0.0f;
 	//SpriteSheetTextureID = NULL;
 	bulletindex = 0;
 	animationTime = 0;
@@ -138,7 +140,7 @@ void App::Init(){
 	elapsed = 0;
 	screenShakeValue = 0.0f;
 	gravity_y = -.0075f;
-
+	//Player
 	player.textureID = LoadTexture("characters_3.png");
 	player.spriteCountX = 8;
 	player.spriteCountY = 4;
@@ -149,7 +151,7 @@ void App::Init(){
 	player.height = .2;
 	player.rotation = 0;
 	Entities.push_back(&player);
-
+	//Floor
 	for (int i = 0; i < 40; i++){
 		Ast[i].textureID = SpriteSheetTextureID;
 		Ast[i].spriteCountX = 16;
@@ -164,17 +166,43 @@ void App::Init(){
 		Ast[i].velocity_y = 0;
 		floor.push_back(&Ast[i]);
 	}
-
+	//Player animation stuff
 	for (int i = 0; i < 4; i++){
 		paIndex1[i] = i + 8;
 	}
-
 	numFrames = 4;
 	currentindex = 0;
-	
+	//Particle Emitter Stuff
 	ParticleEmitter temp(25);
 	playerParticles = temp;
 	playerParticles.position.x = -.85f;
+	//Wandering background stuff
+	for (int i = 0; i < 4; i++){
+		Snakes[i].textureID = LoadTexture("characters_3.png");
+		Snakes[i].spriteCountX = 8;
+		Snakes[i].spriteCountY = 4;
+		Snakes[i].index = 24;
+		Snakes[i].height = .15;
+		Snakes[i].width = .15;
+		Snakes[i].y = -.825;
+		Snakes[i].x = 5;
+		Snakes[i].rotation = 0;
+		Snakes[i].velocity_x = -0.005 + (-.003*RANDOM_NUMBER);
+		Snakes[i].velocity_y = .05;
+		if (i % 2 == 0){
+			Snakes[i].scale_x = -1;
+		}
+		else{
+			Snakes[i].scale_x = 1;
+		}
+		Entities.push_back(&Snakes[i]);
+	}
+	//Background animation for Snakes
+	for (int i = 0; i < 4; i++){
+		saIndex[i] = i + 24;
+	}
+	snakescurrentindex = 0;
+
 }
 
 void App::fadeIn() {
@@ -196,15 +224,18 @@ void App::Render(){
 	glClear(GL_COLOR_BUFFER_BIT);//Makes background default color
 
 	//fadeIn();
+
+
+	if (!player.collideBot){
+		playerParticles.Render();
+	}
+
+
 	for (int i = 0; i < Entities.size(); i++){
 		Entities[i]->Render();
 	}
 	for (int i = 0; i < floor.size(); i++){
 		floor[i]->Render();
-	}
-
-	if (!player.collideBot){
-		playerParticles.Render();
 	}
 
 	SDL_GL_SwapWindow(displayWindow);
@@ -216,6 +247,14 @@ void App::FixedUpdate(){
 			floor[i]->x = 2.04;
 		}
 		floor[i]->x += floor[i]->velocity_x*FIXED_TIMESTEP;
+	}
+
+	for (int i = 0; i < Entities.size(); i++){
+		Entities[i]->velocity_x += Entities[i]->acceleration_x*FIXED_TIMESTEP;
+		Entities[i]->x += Entities[i]->velocity_x*FIXED_TIMESTEP;
+		if (Entities[i]->checkCollision(player) && player.checkCollision(*Entities[i])){
+				Entities[i]->collideLeft = true;
+		}
 	}
 
 	player.velocity_y += player.acceleration_y*FIXED_TIMESTEP;
@@ -242,7 +281,7 @@ void App::FixedUpdate(){
 
 void App::Update(){
 	timer += elapsed - delay;
-
+	timer2 += elapsed - delay;
 	if (player.collideBot){
 		if (timer > .2) {
 			currentindex++;
@@ -258,7 +297,44 @@ void App::Update(){
 		playerParticles.position.y = player.y - .1f;
 
 	}
-		
+	for (int i = 0; i < 6; i++){
+		if ((Snakes[i].x-player.x)<.6){
+			Snakes[i].velocity_x = -.003;
+			Snakes[i].scale_x = 1;
+		}
+		if (timer2 > .2) {
+			snakescurrentindex++;
+			timer2 = 0.0;
+			if (snakescurrentindex > numFrames - 1) {
+				snakescurrentindex = 0;
+			}
+		}
+		Snakes[i].index = saIndex[snakescurrentindex];
+
+		if (Snakes[i].x < -1.5 || Snakes[i].y < -1.2){
+			Snakes[i].x = 2+RANDOM_NUMBER;
+			if (RANDOM_NUMBER * 2 > 1){
+				Snakes[i].scale_x = -1;
+				Snakes[i].velocity_x = -0.005 + (-.003*RANDOM_NUMBER);
+			}
+			else
+			{
+				Snakes[i].velocity_x = -0.005 + (-.001*RANDOM_NUMBER);
+			}
+			Snakes[i].resetCollisions();
+			Snakes[i].scale_y = 1;
+		}
+		if (Snakes[i].collideLeft){
+			Snakes[i].velocity_x = .002;
+			Snakes[i].y += Snakes[i].velocity_y*FIXED_TIMESTEP;
+			Snakes[i].velocity_y += gravity_y*FIXED_TIMESTEP;
+			Snakes[i].rotation += 10*FIXED_TIMESTEP;
+		}
+	}
+
+
+
+
 	playerParticles.Update(timeLeftOver);
 
 	delay = elapsed;
