@@ -203,7 +203,7 @@ void App::Init(){
 	}
 	snakescurrentindex = 0;
 	//Bullets
-	totalbullets = 1;
+	totalbullets = 6;
 	SpriteSheetTextureID = LoadTexture("SpaceShooterSprites.png");
 	for (int i = 0; i < totalbullets; i++){
 		bullets[i].textureID = SpriteSheetTextureID;
@@ -213,7 +213,9 @@ void App::Init(){
 		bullets[i].height = .15;
 		bullets[i].width = .15;
 		bullets[i].x = 2;
+		bullets[i].acceleration_x = 0;
 		bullets[i].rotation = 0;
+		bullets[i].visible = false;
 		Entities.push_back(&bullets[i]);
 	}
 	for (int i = 0; i < totalbullets; i++){
@@ -223,12 +225,12 @@ void App::Init(){
 		bulletindicators[i].index = 8;
 		bulletindicators[i].height = .075;
 		bulletindicators[i].width = .075;
-		bulletindicators[i].y = -1+2*RANDOM_NUMBER;
+		bulletindicators[i].set_y = -1+2*RANDOM_NUMBER;
 		bulletindicators[i].x = 1.27;
 		bulletindicators[i].rotation = 0;
+		bulletindicators[i].collideTop = true;
 		bulletmech.push_back(&bulletindicators[i]);
 	}
-
 
 
 
@@ -296,6 +298,11 @@ void App::FixedUpdate(){
 	if (player.y < -.8){
 		player.y = -.8;
 		player.collideBot = true;
+		player.velocity_y = 0;
+	}
+	if (player.y > .95){
+		player.y = .95;
+		player.collideTop = true;
 		player.velocity_y = 0;
 	}
 	keys = SDL_GetKeyboardState(NULL);
@@ -378,28 +385,34 @@ void App::Update(){
 	playerParticles.Update(timeLeftOver);
 	//Bullets
 	for (int i = 0; i < totalbullets; i++){
-		if (bulletindicators[i].visible != 0){
+		if (bulletindicators[i].collideTop){
 			bullettimers[i] += actualElapsed;
 			if (bullettimers[i] <= 2.5){
 				bulletindicators[i].rotation += 45 * FIXED_TIMESTEP;
-				float animationValue = mapValue(bullettimers[i], 0, 500, 0.0f, 1.0);
+				float animationValue = mapValue(bullettimers[i], 0, 1750, 0.0f, 1.0);
 				bulletindicators[i].y = bulletindicators[i].set_y;
 				bulletindicators[i].set_y = lerp(bulletindicators[i].y, player.y, animationValue);
 			}
 			else
 			{
+				bullets[i].x = 2;
 				bullets[i].y = bulletindicators[i].set_y;
-				bulletindicators[i].visible = 0;
+				bulletindicators[i].collideTop = false;
 				bullets[i].velocity_x = -0.04;
+				bullets[i].visible = true;
 			}
-			cout << bulletindicators[i].visible << " " << i << endl;
 		}
+
 		if (bullets[i].x < -1.5){
-			bullets[i].x = 2.5;
 			bullets[i].velocity_x = 0.0f;
+			bullets[i].visible = false;
 		}
 	}
-
+	for (int i = 0; i < totalbullets; i++){
+		if (!bulletindicators[i].collideTop){
+			bulletindicators[i].visible = false;
+		}
+	}
 
 
 
