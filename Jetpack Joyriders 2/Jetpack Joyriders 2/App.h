@@ -23,6 +23,8 @@ public:
 	float lastFrameTicks;
 	float elapsed, delay, actualElapsed, timer, timer2;
 
+	float bullettimers[8];
+
 	GLuint SpriteSheetTextureID;
 
 	vector<Entity*> Entities;
@@ -43,6 +45,8 @@ public:
 
 	float gravity_y;
 
+	int totalbullets;
+	vector<Entity*> bulletmech;
 	Entity bulletindicators[8];
 	Entity bullets[8];
 	unsigned int bulletindex;

@@ -156,7 +156,7 @@ void App::Init(){
 		Ast[i].textureID = SpriteSheetTextureID;
 		Ast[i].spriteCountX = 16;
 		Ast[i].spriteCountY = 8;
-		Ast[i].index = 16+RANDOM_NUMBER*3;
+		Ast[i].index = 16 + RANDOM_NUMBER * 3;
 		Ast[i].height = .1;
 		Ast[i].width = .1;
 		Ast[i].x = ((float)i) / 9.9 - 1.67;
@@ -203,9 +203,31 @@ void App::Init(){
 	}
 	snakescurrentindex = 0;
 	//Bullets
-	//for (int i = 0; i < 8; i++){
-	//	/*bullets[i].*/
-	//}
+	totalbullets = 1;
+	SpriteSheetTextureID = LoadTexture("SpaceShooterSprites.png");
+	for (int i = 0; i < totalbullets; i++){
+		bullets[i].textureID = SpriteSheetTextureID;
+		bullets[i].spriteCountX = 8;
+		bullets[i].spriteCountY = 8;
+		bullets[i].index = 32;
+		bullets[i].height = .15;
+		bullets[i].width = .15;
+		bullets[i].x = 2;
+		bullets[i].rotation = 0;
+		Entities.push_back(&bullets[i]);
+	}
+	for (int i = 0; i < totalbullets; i++){
+		bulletindicators[i].textureID = SpriteSheetTextureID;
+		bulletindicators[i].spriteCountX = 8;
+		bulletindicators[i].spriteCountY = 8;
+		bulletindicators[i].index = 8;
+		bulletindicators[i].height = .075;
+		bulletindicators[i].width = .075;
+		bulletindicators[i].y = -1+2*RANDOM_NUMBER;
+		bulletindicators[i].x = 1.27;
+		bulletindicators[i].rotation = 0;
+		bulletmech.push_back(&bulletindicators[i]);
+	}
 
 
 
@@ -237,6 +259,9 @@ void App::Render(){
 		playerParticles.Render();
 	}
 
+	for (int i = 0; i < bulletmech.size(); i++){
+		bulletmech[i]->Render();
+	}
 
 	for (int i = 0; i < Entities.size(); i++){
 		Entities[i]->Render();
@@ -260,7 +285,7 @@ void App::FixedUpdate(){
 		Entities[i]->velocity_x += Entities[i]->acceleration_x*FIXED_TIMESTEP;
 		Entities[i]->x += Entities[i]->velocity_x*FIXED_TIMESTEP;
 		if (Entities[i]->checkCollision(player) && player.checkCollision(*Entities[i])){
-				Entities[i]->collideLeft = true;
+			Entities[i]->collideLeft = true;
 		}
 	}
 
@@ -276,11 +301,9 @@ void App::FixedUpdate(){
 	keys = SDL_GetKeyboardState(NULL);
 
 	if (keys[SDL_SCANCODE_UP]){
-		player.acceleration_y =0.75f*FIXED_TIMESTEP;// Computers too laggy to run it as it's suppose to.
+		player.acceleration_y = 0.75f*FIXED_TIMESTEP;// Computers too laggy to run it as it's suppose to.
 	}
 
-
-	
 
 
 	player.velocity_y = lerp(player.velocity_y, 0.0f, FIXED_TIMESTEP*0.5f);
@@ -290,6 +313,7 @@ void App::Update(){
 	actualElapsed = elapsed - delay;
 	timer += actualElapsed;
 	timer2 += actualElapsed;
+	//Walking animation
 	if (player.collideBot){
 		if (timer > .2) {
 			currentindex++;
@@ -305,8 +329,9 @@ void App::Update(){
 		playerParticles.position.y = player.y - .1f;
 
 	}
+	//Snake movement, death, and respawn.
 	for (int i = 0; i < 6; i++){
-		if ((Snakes[i].x-player.x)<.6){
+		if ((Snakes[i].x - player.x) < .6 && player.collideBot){
 			Snakes[i].velocity_x = -.003 - (0.001*actualElapsed);
 			Snakes[i].scale_x = 1;
 		}
@@ -320,7 +345,7 @@ void App::Update(){
 		Snakes[i].index = saIndex[snakescurrentindex];
 
 		if (Snakes[i].x < -1.5 || (Snakes[i].y < -1.2)){
-			Snakes[i].x = 4+RANDOM_NUMBER;
+			Snakes[i].x = 4 + RANDOM_NUMBER;
 			Snakes[i].y = -.825f;
 			Snakes[i].rotation = 0;
 			Snakes[i].velocity_y = .05;
@@ -339,17 +364,44 @@ void App::Update(){
 			Snakes[i].velocity_x = .002;
 			Snakes[i].y += Snakes[i].velocity_y*FIXED_TIMESTEP;
 			Snakes[i].velocity_y += gravity_y*FIXED_TIMESTEP;
-			Snakes[i].rotation += 10*FIXED_TIMESTEP;
+			Snakes[i].rotation += 10 * FIXED_TIMESTEP;
 		}
 	}
-
+	//Speed increase
 	for (int i = 1; i < Entities.size(); i++){
 		Entities[i]->velocity_x += (-.001*actualElapsed);
 	}
 	for (int i = 0; i < floor.size(); i++){
 		floor[i]->velocity_x += (-.0005*actualElapsed);
 	}
+	//Particles
 	playerParticles.Update(timeLeftOver);
+	//Bullets
+	for (int i = 0; i < totalbullets; i++){
+		if (bulletindicators[i].visible != 0){
+			bullettimers[i] += actualElapsed;
+			if (bullettimers[i] <= 2.5){
+				bulletindicators[i].rotation += 45 * FIXED_TIMESTEP;
+				float animationValue = mapValue(bullettimers[i], 0, 500, 0.0f, 1.0);
+				bulletindicators[i].y = bulletindicators[i].set_y;
+				bulletindicators[i].set_y = lerp(bulletindicators[i].y, player.y, animationValue);
+			}
+			else
+			{
+				bullets[i].y = bulletindicators[i].set_y;
+				bulletindicators[i].visible = 0;
+				bullets[i].velocity_x = -0.04;
+			}
+			cout << bulletindicators[i].visible << " " << i << endl;
+		}
+		if (bullets[i].x < -1.5){
+			bullets[i].x = 2.5;
+			bullets[i].velocity_x = 0.0f;
+		}
+	}
+
+
+
 
 	delay = elapsed;
 }
