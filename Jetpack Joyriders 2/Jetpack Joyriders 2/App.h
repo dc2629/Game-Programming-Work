@@ -48,6 +48,8 @@ public:
 	Entity bulletindicators[8];
 	Entity bullets[8];
 	float bullettimers[8];
+	float bulletanimationtimers[8];
+	float indanimationtimer[8];
 	unsigned int bulletindex[8];
 
 	const Uint8* keys;

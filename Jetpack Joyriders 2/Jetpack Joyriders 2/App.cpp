@@ -151,7 +151,7 @@ void App::Init(){
 	player.rotation = 0;
 	Entities.push_back(&player);
 	//Floor
-	for (int i = 0; i < 40; i++){
+	for (int i = 0; i < 0; i++){
 		Ast[i].textureID = SpriteSheetTextureID;
 		Ast[i].spriteCountX = 16;
 		Ast[i].spriteCountY = 8;
@@ -202,7 +202,7 @@ void App::Init(){
 	}
 	snakescurrentindex = 0;
 	//Bullets
-	totalbullets = 1;
+	totalbullets = 8;
 	SpriteSheetTextureID = LoadTexture("Arrows.png");
 	for (int i = 0; i < totalbullets; i++){
 		bullets[i].textureID = SpriteSheetTextureID;
@@ -211,25 +211,28 @@ void App::Init(){
 		bullets[i].index = 0;
 		bullets[i].height = .15;
 		bullets[i].width = .15;
-		bullets[i].x = 1;
+		bullets[i].x = -1.5;
+		bullets[i].velocity_x = -0.04;
+		bullets[i].set_x = -RANDOM_NUMBER * 100;
 		bullets[i].acceleration_x = 0;
 		bullets[i].rotation = 0;
-		bullets[i].visible = true;
+		bullets[i].visible = false;
 		Entities.push_back(&bullets[i]);
 	}
-	//for (int i = 0; i < totalbullets; i++){
-	//	bulletindicators[i].textureID = SpriteSheetTextureID;
-	//	bulletindicators[i].spriteCountX = 6;
-	//	bulletindicators[i].spriteCountY = 1;
-	//	bulletindicators[i].index = 0;
-	//	bulletindicators[i].height = .075;
-	//	bulletindicators[i].width = .075;
-	//	bulletindicators[i].set_y = -1+2*RANDOM_NUMBER;
-	//	bulletindicators[i].x = 1.27;
-	//	bulletindicators[i].rotation = 0;
-	//	bulletindicators[i].collideTop = true;
-	//	bulletmech.push_back(&bulletindicators[i]);
-	//}
+	SpriteSheetTextureID = LoadTexture("Signal.png");
+	for (int i = 0; i < totalbullets; i++){
+		bulletindicators[i].textureID = SpriteSheetTextureID;
+		bulletindicators[i].spriteCountX = 2;
+		bulletindicators[i].spriteCountY = 1;
+		bulletindicators[i].index = 1;
+		bulletindicators[i].height = .075;
+		bulletindicators[i].width = .075;
+		bulletindicators[i].set_y = -1+2*RANDOM_NUMBER;
+		bulletindicators[i].x = 1.27;
+		bulletindicators[i].rotation = 0;
+		bulletindicators[i].collideTop = false;
+		bulletmech.push_back(&bulletindicators[i]);
+	}
 
 
 
@@ -387,41 +390,55 @@ void App::Update(){
 		if (bulletindicators[i].collideTop){
 			bullettimers[i] += actualElapsed;
 			if (bullettimers[i] <= 2.5){
-				bulletindicators[i].rotation += 45 * FIXED_TIMESTEP;
 				float animationValue = mapValue(bullettimers[i], 0, 1750, 0.0f, 1.0);
 				bulletindicators[i].y = bulletindicators[i].set_y;
 				bulletindicators[i].set_y = lerp(bulletindicators[i].y, player.y, animationValue);
 			}
 			else
 			{
+				bullettimers[i] = 0;
 				bullets[i].x = 2;
 				bullets[i].y = bulletindicators[i].set_y;
 				bulletindicators[i].collideTop = false;
 				bullets[i].velocity_x = -0.04;
 				bullets[i].visible = true;
+				bulletindicators[i].index = 1;
 			}
 		}
-
-		if (bullets[i].x < -1.5){
-			bullets[i].velocity_x = 0.0f;
-			bullets[i].visible = false;
+		if (bullets[i].x < bullets[i].set_x){
+			bulletindicators[i].collideTop = true;
 		}
 	}
 	//Added Bullet Animations
 	for (int i = 0; i < totalbullets; i++){
-		bullettimers[i] += actualElapsed;
+		
+		
+		//Stupid fix for unknown issue.
 		if (!bulletindicators[i].collideTop){
 			bulletindicators[i].visible = false;
 		}
+		else{
+			bulletindicators[i].visible = true;
+		}
+		//Animations
 		if (bullets[i].visible){
-			if (bullettimers[i] > .040) {
+			bulletanimationtimers[i] += actualElapsed;
+			if (bulletanimationtimers[i] > .035) {
 				bulletindex[i]++;
-				bullettimers[i] = 0.0;
+				bulletanimationtimers[i] = 0.0;
 			}
 			if (bulletindex[i] > 5){
 				bulletindex[i] = 0;
 			}
 			bullets[i].index = bulletindex[i];
+		}
+		if (bulletindicators[i].collideTop){
+			indanimationtimer[i] += actualElapsed;
+			if (indanimationtimer[i] > 2.3) {
+				bulletindicators[i].index = 0;
+				indanimationtimer[i] = 0.0;
+			}
+
 		}
 	}
 
