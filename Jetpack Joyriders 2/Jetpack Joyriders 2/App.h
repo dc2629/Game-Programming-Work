@@ -23,8 +23,6 @@ public:
 	float lastFrameTicks;
 	float elapsed, delay, actualElapsed, timer, timer2;
 
-	float bullettimers[8];
-
 	GLuint SpriteSheetTextureID;
 
 	vector<Entity*> Entities;
@@ -49,7 +47,8 @@ public:
 	vector<Entity*> bulletmech;
 	Entity bulletindicators[8];
 	Entity bullets[8];
-	unsigned int bulletindex;
+	float bullettimers[8];
+	unsigned int bulletindex[8];
 
 	const Uint8* keys;
 	SDL_Window* displayWindow;

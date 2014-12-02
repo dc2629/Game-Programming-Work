@@ -134,7 +134,6 @@ void App::Init(){
 	timer = 0.0f;
 	timer2 = 0.0f;
 	//SpriteSheetTextureID = NULL;
-	bulletindex = 0;
 	animationTime = 0;
 	fadeframes = 1.0;
 	elapsed = 0;
@@ -203,34 +202,34 @@ void App::Init(){
 	}
 	snakescurrentindex = 0;
 	//Bullets
-	totalbullets = 6;
-	SpriteSheetTextureID = LoadTexture("SpaceShooterSprites.png");
+	totalbullets = 1;
+	SpriteSheetTextureID = LoadTexture("Arrows.png");
 	for (int i = 0; i < totalbullets; i++){
 		bullets[i].textureID = SpriteSheetTextureID;
-		bullets[i].spriteCountX = 8;
-		bullets[i].spriteCountY = 8;
-		bullets[i].index = 32;
+		bullets[i].spriteCountX = 6;
+		bullets[i].spriteCountY = 1;
+		bullets[i].index = 0;
 		bullets[i].height = .15;
 		bullets[i].width = .15;
-		bullets[i].x = 2;
+		bullets[i].x = 1;
 		bullets[i].acceleration_x = 0;
 		bullets[i].rotation = 0;
-		bullets[i].visible = false;
+		bullets[i].visible = true;
 		Entities.push_back(&bullets[i]);
 	}
-	for (int i = 0; i < totalbullets; i++){
-		bulletindicators[i].textureID = SpriteSheetTextureID;
-		bulletindicators[i].spriteCountX = 8;
-		bulletindicators[i].spriteCountY = 8;
-		bulletindicators[i].index = 8;
-		bulletindicators[i].height = .075;
-		bulletindicators[i].width = .075;
-		bulletindicators[i].set_y = -1+2*RANDOM_NUMBER;
-		bulletindicators[i].x = 1.27;
-		bulletindicators[i].rotation = 0;
-		bulletindicators[i].collideTop = true;
-		bulletmech.push_back(&bulletindicators[i]);
-	}
+	//for (int i = 0; i < totalbullets; i++){
+	//	bulletindicators[i].textureID = SpriteSheetTextureID;
+	//	bulletindicators[i].spriteCountX = 6;
+	//	bulletindicators[i].spriteCountY = 1;
+	//	bulletindicators[i].index = 0;
+	//	bulletindicators[i].height = .075;
+	//	bulletindicators[i].width = .075;
+	//	bulletindicators[i].set_y = -1+2*RANDOM_NUMBER;
+	//	bulletindicators[i].x = 1.27;
+	//	bulletindicators[i].rotation = 0;
+	//	bulletindicators[i].collideTop = true;
+	//	bulletmech.push_back(&bulletindicators[i]);
+	//}
 
 
 
@@ -408,9 +407,21 @@ void App::Update(){
 			bullets[i].visible = false;
 		}
 	}
+	//Added Bullet Animations
 	for (int i = 0; i < totalbullets; i++){
+		bullettimers[i] += actualElapsed;
 		if (!bulletindicators[i].collideTop){
 			bulletindicators[i].visible = false;
+		}
+		if (bullets[i].visible){
+			if (bullettimers[i] > .040) {
+				bulletindex[i]++;
+				bullettimers[i] = 0.0;
+			}
+			if (bulletindex[i] > 5){
+				bulletindex[i] = 0;
+			}
+			bullets[i].index = bulletindex[i];
 		}
 	}
 
