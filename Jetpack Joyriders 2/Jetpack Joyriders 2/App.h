@@ -52,6 +52,10 @@ public:
 	float indanimationtimer[8];
 	unsigned int bulletindex[8];
 
+	Entity Coins[5];
+	float cointimer[5];
+
+
 	const Uint8* keys;
 	SDL_Window* displayWindow;
 

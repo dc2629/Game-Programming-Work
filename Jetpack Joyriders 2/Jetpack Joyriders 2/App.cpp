@@ -138,7 +138,7 @@ void App::Init(){
 	fadeframes = 1.0;
 	elapsed = 0;
 	screenShakeValue = 0.0f;
-	gravity_y = -.0075f;
+	gravity_y = -.009f;
 	//Player
 	player.textureID = LoadTexture("characters_3.png");
 	player.spriteCountX = 8;
@@ -151,20 +151,20 @@ void App::Init(){
 	player.rotation = 0;
 	Entities.push_back(&player);
 	//Floor
-	for (int i = 0; i < 0; i++){
-		Ast[i].textureID = SpriteSheetTextureID;
-		Ast[i].spriteCountX = 16;
-		Ast[i].spriteCountY = 8;
-		Ast[i].index = 16 + RANDOM_NUMBER * 3;
-		Ast[i].height = .1;
-		Ast[i].width = .1;
-		Ast[i].x = ((float)i) / 9.9 - 1.67;
-		Ast[i].y = -.95;
-		Ast[i].rotation = 0;
-		Ast[i].velocity_x = -0.005;
-		Ast[i].velocity_y = 0;
-		floor.push_back(&Ast[i]);
-	}
+	//for (int i = 0; i < 40; i++){
+	//	Ast[i].textureID = SpriteSheetTextureID;
+	//	Ast[i].spriteCountX = 16;
+	//	Ast[i].spriteCountY = 8;
+	//	Ast[i].index = 16 + RANDOM_NUMBER * 3;
+	//	Ast[i].height = .1;
+	//	Ast[i].width = .1;
+	//	Ast[i].x = ((float)i) / 9.9 - 1.67;
+	//	Ast[i].y = -.95;
+	//	Ast[i].rotation = 0;
+	//	Ast[i].velocity_x = -0.005;
+	//	Ast[i].velocity_y = 0;
+	//	floor.push_back(&Ast[i]);
+	//}
 	//Player animation stuff
 	for (int i = 0; i < 4; i++){
 		paIndex1[i] = i + 8;
@@ -213,7 +213,7 @@ void App::Init(){
 		bullets[i].width = .15;
 		bullets[i].x = -1.5;
 		bullets[i].velocity_x = -0.04;
-		bullets[i].set_x = -RANDOM_NUMBER * 100;
+		bullets[i].set_x = -RANDOM_NUMBER * 200;
 		bullets[i].acceleration_x = 0;
 		bullets[i].rotation = 0;
 		bullets[i].visible = false;
@@ -234,7 +234,24 @@ void App::Init(){
 		bulletmech.push_back(&bulletindicators[i]);
 	}
 
-
+	//Coins
+	SpriteSheetTextureID = LoadTexture("Coin.png");
+	for (int i = 0; i < 5; i++){
+		Coins[i].textureID = SpriteSheetTextureID;
+		Coins[i].spriteCountX = 4;
+		Coins[i].spriteCountY = 1;
+		Coins[i].index = 0;
+		Coins[i].height = .125;
+		Coins[i].width = .2;
+		Coins[i].x = -1.5;
+		Coins[i].velocity_x = -0.01;
+		Coins[i].set_x = -RANDOM_NUMBER * 100;
+		Coins[i].acceleration_x = 0;
+		Coins[i].rotation = 0;
+		Coins[i].visible = true;
+		Entities.push_back(&Coins[i]);
+	}
+	
 
 }
 
@@ -315,11 +332,22 @@ void App::FixedUpdate(){
 	keys = SDL_GetKeyboardState(NULL);
 
 	if (keys[SDL_SCANCODE_UP]){
-		player.acceleration_y = 0.75f*FIXED_TIMESTEP;// Computers too laggy to run it as it's suppose to.
+		player.acceleration_y = 0.9f*FIXED_TIMESTEP;// Computers too laggy to run it as it's suppose to.
 	}
 	if (player.collideLeft){
 		//cout << "you're dead!" << endl;
 	}
+
+	//Coin motion
+	for (int i = 0; i < 5; i++){
+		Coins[i].y += sin(elapsed*5)/200*FIXED_TIMESTEP;
+		Coins[i].rotation += FIXED_TIMESTEP * 2;
+		//Coin Score
+		if (player.checkCollision(Coins[i]) && Coins[i].checkCollision(player)){
+			Coins[i].visible = false;
+		}
+	}
+
 
 
 	player.velocity_y = lerp(player.velocity_y, 0.0f, FIXED_TIMESTEP*0.5f);
@@ -385,10 +413,10 @@ void App::Update(){
 	}
 	//Speed increase
 	for (int i = 1; i < Entities.size(); i++){
-		Entities[i]->velocity_x += (-.001*actualElapsed);
+		Entities[i]->velocity_x += (-.0002*actualElapsed);
 	}
 	for (int i = 0; i < floor.size(); i++){
-		floor[i]->velocity_x += (-.0005*actualElapsed);
+		floor[i]->velocity_x += (-.0001*actualElapsed);
 	}
 	//Particles
 	playerParticles.Update(timeLeftOver);
@@ -448,7 +476,23 @@ void App::Update(){
 
 		}
 	}
+	//Coin Animation and Movement
+	for (int i = 0; i < 5; i++){
+		cointimer[i] += actualElapsed;
+		if (cointimer[i] > .2){
+			cointimer[i] = 0;
+			Coins[i].index++;
+			if (Coins[i].index > 4){
+				Coins[i].index = 0;
+			}
+		}
+		if (Coins[i].x < Coins[i].set_x){
+			Coins[i].x = 2;
+			Coins[i].y = -0.75f + RANDOM_NUMBER*1.5f;
+			Coins[i].visible = true;
+		}
 
+	}
 
 
 	delay = elapsed;
