@@ -285,11 +285,16 @@ void App::FixedUpdate(){
 		floor[i]->x += floor[i]->velocity_x*FIXED_TIMESTEP;
 	}
 
-	for (int i = 0; i < Entities.size(); i++){
+	for (int i = 1; i < Entities.size(); i++){
 		Entities[i]->velocity_x += Entities[i]->acceleration_x*FIXED_TIMESTEP;
 		Entities[i]->x += Entities[i]->velocity_x*FIXED_TIMESTEP;
 		if (Entities[i]->checkCollision(player) && player.checkCollision(*Entities[i])){
 			Entities[i]->collideLeft = true;
+		}
+	}
+	for (int i = 0; i < 8; i++){
+		if (player.checkCollision(bullets[i]) && bullets[i].checkCollision(player)){
+			player.collideLeft = true;
 		}
 	}
 
@@ -312,7 +317,9 @@ void App::FixedUpdate(){
 	if (keys[SDL_SCANCODE_UP]){
 		player.acceleration_y = 0.75f*FIXED_TIMESTEP;// Computers too laggy to run it as it's suppose to.
 	}
-
+	if (player.collideLeft){
+		//cout << "you're dead!" << endl;
+	}
 
 
 	player.velocity_y = lerp(player.velocity_y, 0.0f, FIXED_TIMESTEP*0.5f);
