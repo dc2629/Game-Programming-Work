@@ -151,13 +151,14 @@ void App::Init(){
 	player.rotation = 0;
 	Entities.push_back(&player);
 	//Floor
-	//for (int i = 0; i < 40; i++){
+	//for (int i = 0; i < 1; i++){
 	//	Ast[i].textureID = SpriteSheetTextureID;
 	//	Ast[i].spriteCountX = 16;
 	//	Ast[i].spriteCountY = 8;
 	//	Ast[i].index = 16 + RANDOM_NUMBER * 3;
 	//	Ast[i].height = .1;
-	//	Ast[i].width = .1;
+	//	Ast[i].width = 3;
+	//	Ast[i].repeat = true;
 	//	Ast[i].x = ((float)i) / 9.9 - 1.67;
 	//	Ast[i].y = -.95;
 	//	Ast[i].rotation = 0;
